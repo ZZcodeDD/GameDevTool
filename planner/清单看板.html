@@ -241,8 +241,8 @@
           <tr>
             <th style="width:44px"></th>
             <th>序号</th>
-            <th>分类</th>
             <th>优先级</th>
+            <th>分类</th>
             <th>清单项目</th>
             <th>完成日期</th>
             <th>提醒日期</th>
@@ -451,7 +451,6 @@
         tr.innerHTML = `
           <td><span class="handle ${canDrag ? "" : "disabled"}" title="${canDrag ? "拖动排序" : "优先级排序下不可拖动"}" ${canDrag ? 'draggable="true"' : ""}>⋮⋮</span></td>
           <td class="seq">${item.seq}</td>
-          <td><input data-k="category" type="text" value="${escAttr(item.category)}" style="min-width:88px;font-weight:650" /></td>
           <td>
             <select data-k="priority" class="pri-${item.priority}">
               <option value="高" ${item.priority === "高" ? "selected" : ""}>高</option>
@@ -459,6 +458,7 @@
               <option value="低" ${item.priority === "低" ? "selected" : ""}>低</option>
             </select>
           </td>
+          <td><input data-k="category" type="text" value="${escAttr(item.category)}" style="min-width:88px;font-weight:650" /></td>
           <td><input class="title-input" data-k="title" type="text" value="${escAttr(item.title)}" /></td>
           <td><input data-k="dueDate" type="date" value="${escAttr(item.dueDate)}" /></td>
           <td><input data-k="remindDate" type="date" value="${escAttr(item.remindDate)}" /></td>
