@@ -241,8 +241,8 @@
           <tr>
             <th style="width:44px"></th>
             <th>序号</th>
+            <th>分类</th>
             <th>清单项目</th>
-            <th>子项目</th>
             <th>优先级</th>
             <th>完成日期</th>
             <th>提醒日期</th>
@@ -363,8 +363,8 @@
       const item = {
         id: raw.id || uid(),
         seq: Number.isFinite(raw.seq) ? raw.seq : index + 1,
+        category: raw.category || "未分类",
         title: raw.title || "",
-        subitems: Array.isArray(raw.subitems) ? raw.subitems : [],
         priority: ["高", "中", "低"].includes(raw.priority) ? raw.priority : "中",
         dueDate: raw.dueDate || "",
         remindDate: raw.remindDate || "",

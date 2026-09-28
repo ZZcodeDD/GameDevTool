@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-28T17:52:00+08:00",
+  "updatedAt": "2026-09-28T17:56:00+08:00",
   "timezone": "Asia/Shanghai",
   "rules": {
     "spanThresholdDays": 7,
@@ -10,7 +10,6 @@
     {
       "id": "p_20260929_badminton",
       "title": "炫羽球馆12:15打球",
-      "subitems": [],
       "priority": "中",
       "dueDate": "2026-09-29",
       "remindDate": "2026-09-29",
@@ -18,12 +17,12 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "",
-      "createdAt": "2026-09-28T17:15:00+08:00"
+      "createdAt": "2026-09-28T17:15:00+08:00",
+      "category": "运动"
     },
     {
       "id": "p_20261001_hainan_trip",
-      "title": "十一行程：天河T3→美兰T2→神州半岛",
-      "subitems": [],
+      "title": "天河T3→美兰T2→神州半岛",
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-09-30",
@@ -31,13 +30,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "总项目。线路：CZ3341 天河T3 15:30→美兰T2 17:55；C7343 美兰18:31→神州19:29。行李10项：身份证、手机、充电器、充电宝、耳机、换洗衣服、拖鞋、一套游泳装备、羽毛球装备、羽毛球鞋。换乘约36分钟，尽量手提、盯航班动态；国庆去天河可视路况再提前出门。",
-      "createdAt": "2026-09-28T17:35:00+08:00"
+      "createdAt": "2026-09-28T17:35:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a01",
       "parentId": "p_20261001_hainan_trip",
       "title": "9/30 22:00 按10项收拾行李",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-09-30",
       "remindDate": "2026-09-30",
@@ -45,13 +44,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a02",
       "parentId": "p_20261001_hainan_trip",
       "title": "9/30 22:00 确认两张票可离线查看",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-09-30",
       "remindDate": "2026-09-30",
@@ -59,13 +58,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a03",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 12:00 核对行李",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -73,13 +72,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a04",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 12:55 叫车",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -87,13 +86,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a05",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 13:00 出门，打车去天河T3",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -101,13 +100,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a06",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 15:00 准备登机",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -115,13 +114,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a07",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 15:30 乘坐 CZ3341（天河T3 → 美兰T2）",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -129,13 +128,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a08",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 17:40 机上收拾行李",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -143,13 +142,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a09",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 17:40 准备换乘",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -157,13 +156,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a10",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 17:55 落地，立刻奔美兰站（T2到达3号门下行负一层）",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -171,13 +170,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a11",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 18:15 站台等候 C7343",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -185,13 +184,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a12",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 18:31 乘坐 C7343（美兰 → 神州）",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -199,13 +198,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a13",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 19:20 准备神州站下车",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -213,13 +212,13 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     },
     {
       "id": "p_20261001_a14",
       "parentId": "p_20261001_hainan_trip",
       "title": "10/1 19:29 抵达神州，打车前往神州半岛",
-      "subitems": [],
       "priority": "高",
       "dueDate": "2026-10-01",
       "remindDate": "2026-10-01",
@@ -227,7 +226,8 @@
       "phoneCalendar": false,
       "done": false,
       "notes": "属于十一行程",
-      "createdAt": "2026-09-28T17:52:00+08:00"
+      "createdAt": "2026-09-28T17:52:00+08:00",
+      "category": "十一行程"
     }
   ]
 }
