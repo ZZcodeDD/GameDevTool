@@ -365,7 +365,6 @@
         category: raw.category || "未分类",
         title: raw.title || "",
         priority: ["高", "中", "低"].includes(raw.priority) ? raw.priority : "中",
-        dueDate: raw.dueDate || "",
         remindDate: raw.remindDate || "",
         remindTime: raw.remindTime || "",
         phoneCalendar: raw.phoneCalendar === true,
@@ -459,7 +458,6 @@
           </td>
           <td><input data-k="category" type="text" value="${escAttr(item.category)}" style="min-width:88px;font-weight:650" /></td>
           <td><input class="title-input" data-k="title" type="text" value="${escAttr(item.title)}" /></td>
-          <td><input data-k="dueDate" type="date" value="${escAttr(item.dueDate)}" /></td>
           <td><input data-k="remindDate" type="date" value="${escAttr(item.remindDate)}" /></td>
           <td><input data-k="remindTime" type="time" value="${escAttr(item.remindTime)}" /></td>
           <td style="text-align:center"><input data-k="phoneCalendar" type="checkbox" ${item.phoneCalendar ? "checked" : ""} /></td>
