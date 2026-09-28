@@ -3,7 +3,7 @@
   "timezone": "Asia/Shanghai",
   "rules": {
     "spanThresholdDays": 7,
-    "cursorRemindIntervalDays": 3,
+    "cursorRemindIntervalDays": 7,
     "sortMode": "seq"
   },
   "items": [

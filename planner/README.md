@@ -16,7 +16,7 @@
 | 规则 | 说明 | 当前默认 |
 | --- | --- | --- |
 | `spanThresholdDays` | 跨度超过多少天，才启用 Cursor 复提醒 | 7 |
-| `cursorRemindIntervalDays` | 满足跨度后，每多少天在 Cursor 提醒一次 | 3 |
+| `cursorRemindIntervalDays` | 满足跨度后，每多少天在 Cursor 提醒一次 | 7 |
 | `sortMode` | `seq` 按序号 · `priority` 按优先级（高→中→低） | `seq` |
 
 按序号时可拖动排序并自动改序号；按优先级时仅按优先级显示，不可拖动。

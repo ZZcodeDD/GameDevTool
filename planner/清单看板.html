@@ -219,7 +219,7 @@
       </label>
       <label>
         Cursor 复提醒间隔（天）
-        <input id="ruleInterval" type="number" min="1" step="1" placeholder="例如 3" />
+        <input id="ruleInterval" type="number" min="1" step="1" placeholder="例如 7" />
       </label>
       <label>
         表格排序
@@ -267,7 +267,7 @@
       updatedAt: "",
       rules: {
         spanThresholdDays: 7,
-        cursorRemindIntervalDays: 3,
+        cursorRemindIntervalDays: 7,
         sortMode: "seq",
       },
       items: [],
@@ -354,7 +354,7 @@
       const r = raw || {};
       return {
         spanThresholdDays: toNullNumber(r.spanThresholdDays ?? 7),
-        cursorRemindIntervalDays: toNullNumber(r.cursorRemindIntervalDays ?? 3),
+        cursorRemindIntervalDays: toNullNumber(r.cursorRemindIntervalDays ?? 7),
         sortMode: r.sortMode === "priority" ? "priority" : "seq",
       };
     }
