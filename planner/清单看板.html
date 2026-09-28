@@ -360,7 +360,7 @@
     }
 
     function normalize(raw, index) {
-      return {
+      const item = {
         id: raw.id || uid(),
         seq: Number.isFinite(raw.seq) ? raw.seq : index + 1,
         title: raw.title || "",
@@ -374,6 +374,8 @@
         notes: raw.notes || "",
         createdAt: raw.createdAt || nowIso(),
       };
+      if (raw.parentId) item.parentId = raw.parentId;
+      return item;
     }
 
     function blankItem() {
@@ -422,7 +424,11 @@
           cursorRemindIntervalDays: state.rules.cursorRemindIntervalDays,
           sortMode: state.rules.sortMode,
         },
-        items: bySeq.map(({ seq, ...rest }) => ({ ...rest })),
+        items: bySeq.map(({ seq, ...rest }) => {
+          const out = { ...rest };
+          if (!out.parentId) delete out.parentId;
+          return out;
+        }),
       };
     }
 
