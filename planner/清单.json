@@ -1,6 +1,11 @@
 {
-  "updatedAt": "2026-09-28T17:35:00+08:00",
+  "updatedAt": "2026-09-28T17:40:00+08:00",
   "timezone": "Asia/Shanghai",
+  "rules": {
+    "spanThresholdDays": 7,
+    "cursorRemindIntervalDays": 3,
+    "sortMode": "seq"
+  },
   "items": [
     {
       "id": "p_20260929_badminton",
@@ -13,8 +18,6 @@
       "remindDate": "2026-09-29",
       "remindTime": "12:15",
       "phoneCalendar": false,
-      "spanThresholdDays": null,
-      "cursorRemindIntervalDays": null,
       "done": false,
       "notes": "测试条目：9月29日中午12点15炫羽球馆打球",
       "createdAt": "2026-09-28T17:15:00+08:00"
@@ -40,8 +43,6 @@
       "remindDate": "2026-09-30",
       "remindTime": "22:00",
       "phoneCalendar": false,
-      "spanThresholdDays": null,
-      "cursorRemindIntervalDays": null,
       "done": false,
       "notes": "空铁换乘仅约36分钟：尽量手提、航班正点；国庆去天河建议视路况再提前出门。备选：关注CZ3341与C7343动态。",
       "createdAt": "2026-09-28T17:35:00+08:00"

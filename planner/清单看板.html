@@ -60,6 +60,44 @@
     button:hover { filter: brightness(0.98); }
     .file-btn { display: inline-flex; align-items: center; }
     .file-btn input { display: none; }
+    .rules {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px 14px;
+      margin-bottom: 12px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.85);
+      box-shadow: var(--shadow);
+    }
+    .rules h2 {
+      grid-column: 1 / -1;
+      margin: 0 0 2px;
+      font-size: 0.95rem;
+      color: var(--head);
+    }
+    .rules label {
+      display: grid;
+      gap: 6px;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+    .rules input, .rules select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+    }
+    .rules .note {
+      grid-column: 1 / -1;
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
     .meta {
       margin: 0 0 12px;
       color: var(--muted);
@@ -108,7 +146,11 @@
       padding: 4px 6px;
       display: inline-block;
     }
-    .handle:active { cursor: grabbing; }
+    .handle.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .handle:active:not(.disabled) { cursor: grabbing; }
     .seq {
       font-variant-numeric: tabular-nums;
       font-weight: 700;
@@ -132,7 +174,6 @@
     textarea { min-height: 56px; resize: vertical; }
     .title-input { min-width: 160px; font-weight: 650; }
     .sub-input { min-width: 140px; }
-    .num-input { width: 72px; }
     .done-row td { opacity: 0.55; }
     .done-row .title-input { text-decoration: line-through; }
     .pri-高 { color: #a11f1f; font-weight: 700; }
@@ -160,7 +201,7 @@
     <header>
       <div>
         <h1>日次清单</h1>
-        <p class="sub">表头横向 · 记录纵向 · 拖动左侧 ⋮⋮ 自动重排序号</p>
+        <p class="sub">表头横向 · 记录纵向 · 规则在表上方统一设定</p>
       </div>
       <div class="actions">
         <button type="button" id="btnAdd">新增记录</button>
@@ -169,6 +210,30 @@
         <button type="button" id="btnExport" class="primary">导出 JSON</button>
       </div>
     </header>
+
+    <section class="rules" aria-label="表格规则设定">
+      <h2>表格规则设定</h2>
+      <label>
+        跨度超过（天）
+        <input id="ruleSpan" type="number" min="0" step="1" placeholder="例如 7" />
+      </label>
+      <label>
+        Cursor 复提醒间隔（天）
+        <input id="ruleInterval" type="number" min="1" step="1" placeholder="例如 3" />
+      </label>
+      <label>
+        表格排序
+        <select id="ruleSort">
+          <option value="seq">按序号顺序</option>
+          <option value="priority">按优先级顺序</option>
+        </select>
+      </label>
+      <p class="note">
+        长周期规则：若「今天→完成日期」天数 ≥「跨度超过」，则按「Cursor 复提醒间隔」在对话里提醒。
+        选「按序号」时可拖动 ⋮⋮ 调整先后；选「按优先级」时按 高→中→低 显示（拖动关闭）。
+      </p>
+    </section>
+
     <p class="meta" id="metaLine">尚未加载</p>
     <div class="table-scroller">
       <table>
@@ -183,8 +248,6 @@
             <th>提醒日期</th>
             <th>提醒时间</th>
             <th>手机日历提醒</th>
-            <th>跨度超过(天)</th>
-            <th>Cursor复提醒间隔(天)</th>
             <th>完成</th>
             <th></th>
           </tr>
@@ -193,14 +256,22 @@
       </table>
     </div>
     <p class="hint">
-      数据文件：同目录 <code>清单.json</code>。用本地服务打开本页可自动读取；改完点「导出 JSON」覆盖仓库文件，或在 Cursor 对话里让我改。
-      长周期：若「今天→完成日期」天数 ≥「跨度超过」，则按「Cursor复提醒间隔」在对话里提醒你。
+      数据文件：同目录 <code>清单.json</code>。规则写在文件顶部的 <code>rules</code>；改完可导出覆盖仓库，或在 Cursor 对话里让我改。
     </p>
   </div>
   <div class="toast" id="toast"></div>
   <script>
-    const STORAGE_KEY = "rici_board_v1";
-    const state = { updatedAt: "", items: [] };
+    const STORAGE_KEY = "rici_board_v2";
+    const PRI_RANK = { 高: 0, 中: 1, 低: 2 };
+    const state = {
+      updatedAt: "",
+      rules: {
+        spanThresholdDays: 7,
+        cursorRemindIntervalDays: 3,
+        sortMode: "seq",
+      },
+      items: [],
+    };
     let dragId = null;
 
     const els = {
@@ -208,11 +279,14 @@
       meta: document.getElementById("metaLine"),
       toast: document.getElementById("toast"),
       fileImport: document.getElementById("fileImport"),
+      ruleSpan: document.getElementById("ruleSpan"),
+      ruleInterval: document.getElementById("ruleInterval"),
+      ruleSort: document.getElementById("ruleSort"),
     };
 
     document.getElementById("btnAdd").onclick = () => {
       state.items.push(blankItem());
-      renumber();
+      renumberKeepOrder();
       persist();
       render();
       toast("已新增一行");
@@ -221,26 +295,42 @@
     document.getElementById("btnExport").onclick = exportJson;
     els.fileImport.onchange = importJson;
 
+    els.ruleSpan.addEventListener("change", onRulesChange);
+    els.ruleInterval.addEventListener("change", onRulesChange);
+    els.ruleSort.addEventListener("change", onRulesChange);
+
     loadInitial(false);
+
+    function onRulesChange() {
+      state.rules.spanThresholdDays = toNullNumber(els.ruleSpan.value);
+      state.rules.cursorRemindIntervalDays = toNullNumber(els.ruleInterval.value);
+      state.rules.sortMode = els.ruleSort.value === "priority" ? "priority" : "seq";
+      persist();
+      render();
+      toast(state.rules.sortMode === "priority" ? "已按优先级排序显示" : "已按序号排序显示");
+    }
+
+    function syncRulesToForm() {
+      els.ruleSpan.value = state.rules.spanThresholdDays ?? "";
+      els.ruleInterval.value = state.rules.cursorRemindIntervalDays ?? "";
+      els.ruleSort.value = state.rules.sortMode === "priority" ? "priority" : "seq";
+    }
 
     async function loadInitial(forceNetwork) {
       try {
         if (!forceNetwork) {
           const local = localStorage.getItem(STORAGE_KEY);
-          if (local) {
-            applyPayload(JSON.parse(local), "本机缓存");
-            // 仍尝试拉取文件，若更新则覆盖
-          }
+          if (local) applyPayload(JSON.parse(local), "本机缓存");
         }
         const res = await fetch("./清单.json?t=" + Date.now(), { cache: "no-store" });
         if (!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
-        applyPayload(data, "清单.json");
+        applyPayload(await res.json(), "清单.json");
         toast("已加载 清单.json");
       } catch (err) {
         if (!state.items.length) {
           applyPayload({
             updatedAt: nowIso(),
+            rules: state.rules,
             items: [],
           }, "空清单（未能读取 JSON，可导入或新增）");
         }
@@ -250,17 +340,29 @@
 
     function applyPayload(data, source) {
       state.updatedAt = data.updatedAt || nowIso();
+      state.rules = normalizeRules(data.rules);
       state.items = Array.isArray(data.items) ? data.items.map(normalize) : [];
-      renumber();
+      // 兼容旧字段：若条目上还有跨度字段则忽略
+      renumberKeepOrder();
+      syncRulesToForm();
       persist();
       render();
       els.meta.textContent = `来源：${source} · 更新 ${state.updatedAt} · 共 ${state.items.length} 条`;
     }
 
+    function normalizeRules(raw) {
+      const r = raw || {};
+      return {
+        spanThresholdDays: toNullNumber(r.spanThresholdDays ?? 7),
+        cursorRemindIntervalDays: toNullNumber(r.cursorRemindIntervalDays ?? 3),
+        sortMode: r.sortMode === "priority" ? "priority" : "seq",
+      };
+    }
+
     function normalize(raw, index) {
       return {
         id: raw.id || uid(),
-        seq: index + 1,
+        seq: Number.isFinite(raw.seq) ? raw.seq : index + 1,
         title: raw.title || "",
         subitems: Array.isArray(raw.subitems) ? raw.subitems : [],
         priority: ["高", "中", "低"].includes(raw.priority) ? raw.priority : "中",
@@ -268,8 +370,6 @@
         remindDate: raw.remindDate || "",
         remindTime: raw.remindTime || "",
         phoneCalendar: raw.phoneCalendar === true,
-        spanThresholdDays: raw.spanThresholdDays ?? "",
-        cursorRemindIntervalDays: raw.cursorRemindIntervalDays ?? "",
         done: Boolean(raw.done),
         notes: raw.notes || "",
         createdAt: raw.createdAt || nowIso(),
@@ -285,27 +385,44 @@
       }, state.items.length);
     }
 
-    function renumber() {
+    function renumberKeepOrder() {
+      // 按当前数组顺序重写序号（拖拽后调用）
       state.items.forEach((item, i) => { item.seq = i + 1; });
+    }
+
+    function orderedForView() {
+      const items = state.items.slice();
+      if (state.rules.sortMode === "priority") {
+        items.sort((a, b) => {
+          if (a.done !== b.done) return a.done ? 1 : -1;
+          const pa = PRI_RANK[a.priority] ?? 9;
+          const pb = PRI_RANK[b.priority] ?? 9;
+          if (pa !== pb) return pa - pb;
+          return (a.seq || 0) - (b.seq || 0);
+        });
+      } else {
+        items.sort((a, b) => (a.seq || 0) - (b.seq || 0));
+      }
+      return items;
     }
 
     function persist() {
       state.updatedAt = nowIso();
-      const payload = toPayload();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      els.meta.textContent = `已保存到本机 · 更新 ${state.updatedAt} · 共 ${state.items.length} 条 · 记得导出 JSON 同步到仓库`;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toPayload()));
+      els.meta.textContent = `已保存到本机 · 更新 ${state.updatedAt} · 共 ${state.items.length} 条 · 排序：${state.rules.sortMode === "priority" ? "优先级" : "序号"} · 记得导出 JSON 同步到仓库`;
     }
 
     function toPayload() {
+      const bySeq = state.items.slice().sort((a, b) => (a.seq || 0) - (b.seq || 0));
       return {
         updatedAt: state.updatedAt,
         timezone: "Asia/Shanghai",
-        items: state.items.map(({ seq, ...rest }) => ({
-          ...rest,
-          subitems: rest.subitems,
-          spanThresholdDays: toNullNumber(rest.spanThresholdDays),
-          cursorRemindIntervalDays: toNullNumber(rest.cursorRemindIntervalDays),
-        })),
+        rules: {
+          spanThresholdDays: state.rules.spanThresholdDays,
+          cursorRemindIntervalDays: state.rules.cursorRemindIntervalDays,
+          sortMode: state.rules.sortMode,
+        },
+        items: bySeq.map(({ seq, ...rest }) => ({ ...rest })),
       };
     }
 
@@ -316,15 +433,17 @@
     }
 
     function render() {
+      const canDrag = state.rules.sortMode === "seq";
+      const viewItems = orderedForView();
       els.tbody.innerHTML = "";
-      state.items.forEach((item) => {
+
+      viewItems.forEach((item) => {
         const tr = document.createElement("tr");
-        tr.draggable = false;
         tr.dataset.id = item.id;
         if (item.done) tr.classList.add("done-row");
 
         tr.innerHTML = `
-          <td><span class="handle" title="拖动排序" draggable="true">⋮⋮</span></td>
+          <td><span class="handle ${canDrag ? "" : "disabled"}" title="${canDrag ? "拖动排序" : "优先级排序下不可拖动"}" ${canDrag ? 'draggable="true"' : ""}>⋮⋮</span></td>
           <td class="seq">${item.seq}</td>
           <td><input class="title-input" data-k="title" type="text" value="${escAttr(item.title)}" /></td>
           <td><textarea class="sub-input" data-k="subitems" placeholder="一行一个子项目">${escText(item.subitems.join("\n"))}</textarea></td>
@@ -339,8 +458,6 @@
           <td><input data-k="remindDate" type="date" value="${escAttr(item.remindDate)}" /></td>
           <td><input data-k="remindTime" type="time" value="${escAttr(item.remindTime)}" /></td>
           <td style="text-align:center"><input data-k="phoneCalendar" type="checkbox" ${item.phoneCalendar ? "checked" : ""} /></td>
-          <td><input class="num-input" data-k="spanThresholdDays" type="number" min="0" step="1" value="${escAttr(item.spanThresholdDays)}" placeholder="—" /></td>
-          <td><input class="num-input" data-k="cursorRemindIntervalDays" type="number" min="1" step="1" value="${escAttr(item.cursorRemindIntervalDays)}" placeholder="—" /></td>
           <td style="text-align:center"><input data-k="done" type="checkbox" ${item.done ? "checked" : ""} /></td>
           <td><button type="button" data-del>删除</button></td>
         `;
@@ -358,6 +475,11 @@
             }
             if (key === "priority") {
               el.className = "pri-" + item.priority;
+              if (state.rules.sortMode === "priority") {
+                persist();
+                render();
+                return;
+              }
             }
             if (key === "done") tr.classList.toggle("done-row", item.done);
             persist();
@@ -367,45 +489,49 @@
         tr.querySelector("[data-del]").onclick = () => {
           if (!confirm("删除这条记录？")) return;
           state.items = state.items.filter((x) => x.id !== item.id);
-          renumber();
+          // 按原序号顺序重排
+          state.items.sort((a, b) => (a.seq || 0) - (b.seq || 0));
+          renumberKeepOrder();
           persist();
           render();
         };
 
         const handle = tr.querySelector(".handle");
-        handle.addEventListener("dragstart", (e) => {
-          dragId = item.id;
-          tr.classList.add("dragging");
-          e.dataTransfer.effectAllowed = "move";
-          e.dataTransfer.setData("text/plain", item.id);
-        });
-        handle.addEventListener("dragend", () => {
-          dragId = null;
-          tr.classList.remove("dragging");
-          els.tbody.querySelectorAll("tr").forEach((r) => r.classList.remove("drag-over"));
-        });
-
-        tr.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          tr.classList.add("drag-over");
-        });
-        tr.addEventListener("dragleave", () => tr.classList.remove("drag-over"));
-        tr.addEventListener("drop", (e) => {
-          e.preventDefault();
-          tr.classList.remove("drag-over");
-          const fromId = dragId || e.dataTransfer.getData("text/plain");
-          const toId = item.id;
-          if (!fromId || fromId === toId) return;
-          const from = state.items.findIndex((x) => x.id === fromId);
-          const to = state.items.findIndex((x) => x.id === toId);
-          if (from < 0 || to < 0) return;
-          const [moved] = state.items.splice(from, 1);
-          state.items.splice(to, 0, moved);
-          renumber();
-          persist();
-          render();
-          toast("已按位置更新序号");
-        });
+        if (canDrag) {
+          handle.addEventListener("dragstart", (e) => {
+            dragId = item.id;
+            tr.classList.add("dragging");
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", item.id);
+          });
+          handle.addEventListener("dragend", () => {
+            dragId = null;
+            tr.classList.remove("dragging");
+            els.tbody.querySelectorAll("tr").forEach((r) => r.classList.remove("drag-over"));
+          });
+          tr.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            tr.classList.add("drag-over");
+          });
+          tr.addEventListener("dragleave", () => tr.classList.remove("drag-over"));
+          tr.addEventListener("drop", (e) => {
+            e.preventDefault();
+            tr.classList.remove("drag-over");
+            const fromId = dragId || e.dataTransfer.getData("text/plain");
+            const toId = item.id;
+            if (!fromId || fromId === toId) return;
+            state.items.sort((a, b) => (a.seq || 0) - (b.seq || 0));
+            const from = state.items.findIndex((x) => x.id === fromId);
+            const to = state.items.findIndex((x) => x.id === toId);
+            if (from < 0 || to < 0) return;
+            const [moved] = state.items.splice(from, 1);
+            state.items.splice(to, 0, moved);
+            renumberKeepOrder();
+            persist();
+            render();
+            toast("已按位置更新序号");
+          });
+        }
 
         els.tbody.appendChild(tr);
       });
@@ -419,7 +545,7 @@
       a.download = "清单.json";
       a.click();
       URL.revokeObjectURL(a.href);
-      toast("已导出 清单.json，可用它覆盖仓库文件");
+      toast("已导出 清单.json");
     }
 
     function importJson(ev) {
