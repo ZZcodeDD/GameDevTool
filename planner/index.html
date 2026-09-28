@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0f2a24" />
+    <title>日次 · 生活与工作清单</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+XiaoWei&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+    <div class="app">
+      <header class="top">
+        <div class="brand-block">
+          <p class="brand">日次</p>
+          <p class="tagline">生活与工作，按日安顿</p>
+        </div>
+        <div class="top-actions">
+          <button type="button" id="exportIcsBtn" class="ghost-btn">导出提醒</button>
+          <button type="button" id="addOpenBtn" class="primary-btn">添加</button>
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="主视图">
+        <button type="button" class="tab is-active" data-view="list">清单</button>
+        <button type="button" class="tab" data-view="calendar">日历</button>
+      </nav>
+
+      <section id="listView" class="view is-active">
+        <div class="filter-row" role="tablist" aria-label="分类">
+          <button type="button" class="chip is-active" data-filter="all">全部</button>
+          <button type="button" class="chip" data-filter="life">生活</button>
+          <button type="button" class="chip" data-filter="work">工作</button>
+          <button type="button" class="chip" data-filter="open">未完成</button>
+        </div>
+        <div id="upcomingBox" class="upcoming"></div>
+        <div id="taskList" class="task-list"></div>
+      </section>
+
+      <section id="calendarView" class="view">
+        <div class="cal-nav">
+          <button type="button" id="prevMonthBtn" class="icon-btn" aria-label="上一月">‹</button>
+          <h2 id="monthLabel" class="month-label"></h2>
+          <button type="button" id="nextMonthBtn" class="icon-btn" aria-label="下一月">›</button>
+        </div>
+        <div class="weekday-row" aria-hidden="true">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+        </div>
+        <div id="calendarGrid" class="calendar-grid"></div>
+        <div class="legend">
+          <span><i class="dot holiday"></i>放假</span>
+          <span><i class="dot workday"></i>调休上班</span>
+          <span><i class="dot task"></i>有事项</span>
+        </div>
+        <div id="dayDetail" class="day-detail"></div>
+      </section>
+    </div>
+
+    <dialog id="taskDialog" class="sheet">
+      <form id="taskForm" method="dialog">
+        <header class="sheet-head">
+          <h3 id="dialogTitle">添加事项</h3>
+          <button type="button" id="dialogCloseBtn" class="icon-btn" aria-label="关闭">×</button>
+        </header>
+        <input type="hidden" id="editId" />
+        <label>
+          内容
+          <input id="titleInput" type="text" required maxlength="120" placeholder="例如：交周报 / 买菜" />
+        </label>
+        <label>
+          分类
+          <select id="categoryInput">
+            <option value="life">生活</option>
+            <option value="work">工作</option>
+          </select>
+        </label>
+        <div class="field-row">
+          <label>
+            日期
+            <input id="dateInput" type="date" />
+          </label>
+          <label>
+            时间
+            <input id="timeInput" type="time" />
+          </label>
+        </div>
+        <label class="check-label">
+          <input id="remindCheck" type="checkbox" />
+          到点提醒（写入提醒时间，可导出到手机日历）
+        </label>
+        <label id="remindWrap" class="is-hidden">
+          提醒时间
+          <input id="remindInput" type="datetime-local" />
+        </label>
+        <label>
+          备注
+          <textarea id="notesInput" rows="2" maxlength="300" placeholder="可选"></textarea>
+        </label>
+        <div class="sheet-actions">
+          <button type="button" id="deleteBtn" class="danger-btn is-hidden">删除</button>
+          <button type="submit" class="primary-btn grow">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
