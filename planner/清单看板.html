@@ -267,7 +267,7 @@
         dueDate: raw.dueDate || "",
         remindDate: raw.remindDate || "",
         remindTime: raw.remindTime || "",
-        phoneCalendar: Boolean(raw.phoneCalendar),
+        phoneCalendar: raw.phoneCalendar === true,
         spanThresholdDays: raw.spanThresholdDays ?? "",
         cursorRemindIntervalDays: raw.cursorRemindIntervalDays ?? "",
         done: Boolean(raw.done),

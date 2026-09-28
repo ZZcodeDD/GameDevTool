@@ -12,7 +12,7 @@
       "dueDate": "2026-09-29",
       "remindDate": "2026-09-29",
       "remindTime": "12:15",
-      "phoneCalendar": true,
+      "phoneCalendar": false,
       "spanThresholdDays": null,
       "cursorRemindIntervalDays": null,
       "done": false,
