@@ -1,0 +1,23 @@
+{
+  "updatedAt": "2026-09-28T17:15:00+08:00",
+  "timezone": "Asia/Shanghai",
+  "items": [
+    {
+      "id": "p_20260929_badminton",
+      "title": "炫羽球馆打球",
+      "subitems": [
+        "中午 12:15 开打"
+      ],
+      "priority": "中",
+      "dueDate": "2026-09-29",
+      "remindDate": "2026-09-29",
+      "remindTime": "12:15",
+      "phoneCalendar": true,
+      "spanThresholdDays": null,
+      "cursorRemindIntervalDays": null,
+      "done": false,
+      "notes": "测试条目：9月29日中午12点15炫羽球馆打球",
+      "createdAt": "2026-09-28T17:15:00+08:00"
+    }
+  ]
+}

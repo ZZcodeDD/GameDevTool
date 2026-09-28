@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>日次清单看板</title>
+  <style>
+    :root {
+      --ink: #1a2220;
+      --muted: #5a6b65;
+      --line: #d5ddd8;
+      --head: #0f2a24;
+      --head-fg: #f4f1ea;
+      --row: #ffffff;
+      --row-alt: #f3f7f4;
+      --accent: #1f5c4d;
+      --warn: #a14a16;
+      --bg: #e8eee9;
+      --shadow: 0 10px 30px rgba(15, 42, 36, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(800px 360px at 0% 0%, rgba(31, 92, 77, 0.12), transparent 60%),
+        linear-gradient(180deg, #eef3f0, var(--bg));
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1400px; margin: 0 auto; padding: 20px 16px 48px; }
+    header {
+      display: flex; flex-wrap: wrap; gap: 12px;
+      align-items: flex-end; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      letter-spacing: 0.06em;
+      color: var(--head);
+      font-weight: 700;
+    }
+    .sub { margin: 4px 0 0; color: var(--muted); font-size: 0.92rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    button, .file-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font: inherit;
+    }
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: transparent;
+      font-weight: 650;
+    }
+    button:hover { filter: brightness(0.98); }
+    .file-btn { display: inline-flex; align-items: center; }
+    .file-btn input { display: none; }
+    .meta {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+    .table-scroller {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: max-content;
+      min-width: 100%;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--head);
+      color: var(--head-fg);
+      font-weight: 600;
+      text-align: left;
+      padding: 12px 10px;
+      white-space: nowrap;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    tbody td {
+      padding: 8px 10px;
+      border-top: 1px solid var(--line);
+      border-right: 1px solid #eef2ef;
+      vertical-align: top;
+      background: var(--row);
+    }
+    tbody tr:nth-child(even) td { background: var(--row-alt); }
+    tbody tr.dragging td { background: #dff0e8; opacity: 0.92; }
+    tbody tr.drag-over td { box-shadow: inset 0 2px 0 var(--accent); }
+    .handle {
+      cursor: grab;
+      user-select: none;
+      color: var(--muted);
+      font-size: 1.1rem;
+      padding: 4px 6px;
+      display: inline-block;
+    }
+    .handle:active { cursor: grabbing; }
+    .seq {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    input[type="text"], input[type="date"], input[type="time"], select, textarea {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid transparent;
+      background: transparent;
+      border-radius: 8px;
+      padding: 6px 8px;
+      font: inherit;
+      color: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: rgba(31, 92, 77, 0.45);
+      background: #fff;
+    }
+    textarea { min-height: 56px; resize: vertical; }
+    .title-input { min-width: 160px; font-weight: 650; }
+    .sub-input { min-width: 140px; }
+    .num-input { width: 72px; }
+    .done-row td { opacity: 0.55; }
+    .done-row .title-input { text-decoration: line-through; }
+    .pri-高 { color: #a11f1f; font-weight: 700; }
+    .pri-中 { color: var(--warn); font-weight: 650; }
+    .pri-低 { color: var(--muted); }
+    .hint {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+    .toast {
+      position: fixed; right: 16px; bottom: 16px;
+      background: var(--head); color: #fff;
+      padding: 10px 14px; border-radius: 10px;
+      opacity: 0; transform: translateY(8px);
+      transition: 0.25s ease; pointer-events: none;
+      z-index: 9;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>日次清单</h1>
+        <p class="sub">表头横向 · 记录纵向 · 拖动左侧 ⋮⋮ 自动重排序号</p>
+      </div>
+      <div class="actions">
+        <button type="button" id="btnAdd">新增记录</button>
+        <button type="button" id="btnReload">重新加载 JSON</button>
+        <label class="file-btn">导入 JSON<input type="file" id="fileImport" accept="application/json,.json" /></label>
+        <button type="button" id="btnExport" class="primary">导出 JSON</button>
+      </div>
+    </header>
+    <p class="meta" id="metaLine">尚未加载</p>
+    <div class="table-scroller">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:44px"></th>
+            <th>序号</th>
+            <th>清单项目</th>
+            <th>子项目</th>
+            <th>优先级</th>
+            <th>完成日期</th>
+            <th>提醒日期</th>
+            <th>提醒时间</th>
+            <th>手机日历提醒</th>
+            <th>跨度超过(天)</th>
+            <th>Cursor复提醒间隔(天)</th>
+            <th>完成</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p class="hint">
+      数据文件：同目录 <code>清单.json</code>。用本地服务打开本页可自动读取；改完点「导出 JSON」覆盖仓库文件，或在 Cursor 对话里让我改。
+      长周期：若「今天→完成日期」天数 ≥「跨度超过」，则按「Cursor复提醒间隔」在对话里提醒你。
+    </p>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    const STORAGE_KEY = "rici_board_v1";
+    const state = { updatedAt: "", items: [] };
+    let dragId = null;
+
+    const els = {
+      tbody: document.getElementById("tbody"),
+      meta: document.getElementById("metaLine"),
+      toast: document.getElementById("toast"),
+      fileImport: document.getElementById("fileImport"),
+    };
+
+    document.getElementById("btnAdd").onclick = () => {
+      state.items.push(blankItem());
+      renumber();
+      persist();
+      render();
+      toast("已新增一行");
+    };
+    document.getElementById("btnReload").onclick = () => loadInitial(true);
+    document.getElementById("btnExport").onclick = exportJson;
+    els.fileImport.onchange = importJson;
+
+    loadInitial(false);
+
+    async function loadInitial(forceNetwork) {
+      try {
+        if (!forceNetwork) {
+          const local = localStorage.getItem(STORAGE_KEY);
+          if (local) {
+            applyPayload(JSON.parse(local), "本机缓存");
+            // 仍尝试拉取文件，若更新则覆盖
+          }
+        }
+        const res = await fetch("./清单.json?t=" + Date.now(), { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        applyPayload(data, "清单.json");
+        toast("已加载 清单.json");
+      } catch (err) {
+        if (!state.items.length) {
+          applyPayload({
+            updatedAt: nowIso(),
+            items: [],
+          }, "空清单（未能读取 JSON，可导入或新增）");
+        }
+        toast("读取 JSON 失败，可先导入文件：" + err.message);
+      }
+    }
+
+    function applyPayload(data, source) {
+      state.updatedAt = data.updatedAt || nowIso();
+      state.items = Array.isArray(data.items) ? data.items.map(normalize) : [];
+      renumber();
+      persist();
+      render();
+      els.meta.textContent = `来源：${source} · 更新 ${state.updatedAt} · 共 ${state.items.length} 条`;
+    }
+
+    function normalize(raw, index) {
+      return {
+        id: raw.id || uid(),
+        seq: index + 1,
+        title: raw.title || "",
+        subitems: Array.isArray(raw.subitems) ? raw.subitems : [],
+        priority: ["高", "中", "低"].includes(raw.priority) ? raw.priority : "中",
+        dueDate: raw.dueDate || "",
+        remindDate: raw.remindDate || "",
+        remindTime: raw.remindTime || "",
+        phoneCalendar: Boolean(raw.phoneCalendar),
+        spanThresholdDays: raw.spanThresholdDays ?? "",
+        cursorRemindIntervalDays: raw.cursorRemindIntervalDays ?? "",
+        done: Boolean(raw.done),
+        notes: raw.notes || "",
+        createdAt: raw.createdAt || nowIso(),
+      };
+    }
+
+    function blankItem() {
+      return normalize({
+        title: "新项目",
+        subitems: [],
+        priority: "中",
+        phoneCalendar: false,
+      }, state.items.length);
+    }
+
+    function renumber() {
+      state.items.forEach((item, i) => { item.seq = i + 1; });
+    }
+
+    function persist() {
+      state.updatedAt = nowIso();
+      const payload = toPayload();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      els.meta.textContent = `已保存到本机 · 更新 ${state.updatedAt} · 共 ${state.items.length} 条 · 记得导出 JSON 同步到仓库`;
+    }
+
+    function toPayload() {
+      return {
+        updatedAt: state.updatedAt,
+        timezone: "Asia/Shanghai",
+        items: state.items.map(({ seq, ...rest }) => ({
+          ...rest,
+          subitems: rest.subitems,
+          spanThresholdDays: toNullNumber(rest.spanThresholdDays),
+          cursorRemindIntervalDays: toNullNumber(rest.cursorRemindIntervalDays),
+        })),
+      };
+    }
+
+    function toNullNumber(v) {
+      if (v === "" || v === null || v === undefined) return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function render() {
+      els.tbody.innerHTML = "";
+      state.items.forEach((item) => {
+        const tr = document.createElement("tr");
+        tr.draggable = false;
+        tr.dataset.id = item.id;
+        if (item.done) tr.classList.add("done-row");
+
+        tr.innerHTML = `
+          <td><span class="handle" title="拖动排序" draggable="true">⋮⋮</span></td>
+          <td class="seq">${item.seq}</td>
+          <td><input class="title-input" data-k="title" type="text" value="${escAttr(item.title)}" /></td>
+          <td><textarea class="sub-input" data-k="subitems" placeholder="一行一个子项目">${escText(item.subitems.join("\n"))}</textarea></td>
+          <td>
+            <select data-k="priority" class="pri-${item.priority}">
+              <option value="高" ${item.priority === "高" ? "selected" : ""}>高</option>
+              <option value="中" ${item.priority === "中" ? "selected" : ""}>中</option>
+              <option value="低" ${item.priority === "低" ? "selected" : ""}>低</option>
+            </select>
+          </td>
+          <td><input data-k="dueDate" type="date" value="${escAttr(item.dueDate)}" /></td>
+          <td><input data-k="remindDate" type="date" value="${escAttr(item.remindDate)}" /></td>
+          <td><input data-k="remindTime" type="time" value="${escAttr(item.remindTime)}" /></td>
+          <td style="text-align:center"><input data-k="phoneCalendar" type="checkbox" ${item.phoneCalendar ? "checked" : ""} /></td>
+          <td><input class="num-input" data-k="spanThresholdDays" type="number" min="0" step="1" value="${escAttr(item.spanThresholdDays)}" placeholder="—" /></td>
+          <td><input class="num-input" data-k="cursorRemindIntervalDays" type="number" min="1" step="1" value="${escAttr(item.cursorRemindIntervalDays)}" placeholder="—" /></td>
+          <td style="text-align:center"><input data-k="done" type="checkbox" ${item.done ? "checked" : ""} /></td>
+          <td><button type="button" data-del>删除</button></td>
+        `;
+
+        tr.querySelectorAll("[data-k]").forEach((el) => {
+          const ev = el.type === "checkbox" || el.tagName === "SELECT" ? "change" : "input";
+          el.addEventListener(ev, () => {
+            const key = el.dataset.k;
+            if (key === "subitems") {
+              item.subitems = el.value.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+            } else if (el.type === "checkbox") {
+              item[key] = el.checked;
+            } else {
+              item[key] = el.value;
+            }
+            if (key === "priority") {
+              el.className = "pri-" + item.priority;
+            }
+            if (key === "done") tr.classList.toggle("done-row", item.done);
+            persist();
+          });
+        });
+
+        tr.querySelector("[data-del]").onclick = () => {
+          if (!confirm("删除这条记录？")) return;
+          state.items = state.items.filter((x) => x.id !== item.id);
+          renumber();
+          persist();
+          render();
+        };
+
+        const handle = tr.querySelector(".handle");
+        handle.addEventListener("dragstart", (e) => {
+          dragId = item.id;
+          tr.classList.add("dragging");
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", item.id);
+        });
+        handle.addEventListener("dragend", () => {
+          dragId = null;
+          tr.classList.remove("dragging");
+          els.tbody.querySelectorAll("tr").forEach((r) => r.classList.remove("drag-over"));
+        });
+
+        tr.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          tr.classList.add("drag-over");
+        });
+        tr.addEventListener("dragleave", () => tr.classList.remove("drag-over"));
+        tr.addEventListener("drop", (e) => {
+          e.preventDefault();
+          tr.classList.remove("drag-over");
+          const fromId = dragId || e.dataTransfer.getData("text/plain");
+          const toId = item.id;
+          if (!fromId || fromId === toId) return;
+          const from = state.items.findIndex((x) => x.id === fromId);
+          const to = state.items.findIndex((x) => x.id === toId);
+          if (from < 0 || to < 0) return;
+          const [moved] = state.items.splice(from, 1);
+          state.items.splice(to, 0, moved);
+          renumber();
+          persist();
+          render();
+          toast("已按位置更新序号");
+        });
+
+        els.tbody.appendChild(tr);
+      });
+    }
+
+    function exportJson() {
+      const payload = toPayload();
+      const blob = new Blob([JSON.stringify(payload, null, 2) + "\n"], { type: "application/json;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "清单.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast("已导出 清单.json，可用它覆盖仓库文件");
+    }
+
+    function importJson(ev) {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          applyPayload(JSON.parse(String(reader.result)), file.name);
+          toast("导入成功");
+        } catch (err) {
+          toast("导入失败：" + err.message);
+        }
+      };
+      reader.readAsText(file, "utf-8");
+      ev.target.value = "";
+    }
+
+    function toast(msg) {
+      els.toast.textContent = msg;
+      els.toast.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => els.toast.classList.remove("show"), 2200);
+    }
+
+    function nowIso() {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      const off = -d.getTimezoneOffset();
+      const sign = off >= 0 ? "+" : "-";
+      const oh = pad(Math.floor(Math.abs(off) / 60));
+      const om = pad(Math.abs(off) % 60);
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}${sign}${oh}:${om}`;
+    }
+
+    function uid() {
+      return "p_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+    }
+
+    function escAttr(v) {
+      return String(v ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("<", "&lt;");
+    }
+
+    function escText(v) {
+      return String(v ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;");
+    }
+  </script>
+</body>
+</html>
