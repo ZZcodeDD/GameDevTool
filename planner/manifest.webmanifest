@@ -1,0 +1,10 @@
+{
+  "name": "日次",
+  "short_name": "日次",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f3efe6",
+  "theme_color": "#0f2a24",
+  "description": "生活与工作清单、日历与提醒"
+}

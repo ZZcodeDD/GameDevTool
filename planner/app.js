@@ -1,4 +1,8 @@
+import { PLANNER_CONFIG } from "./config.js";
+import { decryptCloudBlob } from "./crypto.js";
+
 const STORAGE_KEY = "rici_planner_v1";
+const SECRET_KEY = "rici_planner_secrets_v1";
 const CATEGORY_LABEL = { life: "生活", work: "工作" };
 
 const state = {
@@ -9,9 +13,19 @@ const state = {
   month: startOfMonth(new Date()),
   selectedDate: formatDate(new Date()),
   timezone: "Asia/Shanghai",
+  cloudUpdatedAt: "",
+  passphrase: "",
+  ntfyTopic: "",
 };
 
 const els = {
+  unlockView: document.getElementById("unlockView"),
+  appRoot: document.getElementById("appRoot"),
+  passInput: document.getElementById("passInput"),
+  ntfyInput: document.getElementById("ntfyInput"),
+  unlockBtn: document.getElementById("unlockBtn"),
+  unlockError: document.getElementById("unlockError"),
+  syncBar: document.getElementById("syncBar"),
   listView: document.getElementById("listView"),
   calendarView: document.getElementById("calendarView"),
   taskList: document.getElementById("taskList"),
@@ -34,20 +48,26 @@ const els = {
   deleteBtn: document.getElementById("deleteBtn"),
 };
 
-init();
+boot();
 
-async function init() {
+async function boot() {
   bindUi();
-  const [tasksPayload, holidaysPayload] = await Promise.all([
-    loadJson("./data/tasks.json"),
-    loadJson("./data/holidays.json"),
-  ]);
-  hydrateHolidays(holidaysPayload);
-  hydrateTasks(tasksPayload);
-  render();
+  const saved = loadSecrets();
+  if (saved?.passphrase) {
+    els.passInput.value = saved.passphrase;
+    els.ntfyInput.value = saved.ntfyTopic || "";
+    await tryUnlock(saved.passphrase, saved.ntfyTopic || "");
+  }
 }
 
 function bindUi() {
+  els.unlockBtn.addEventListener("click", () => {
+    tryUnlock(els.passInput.value.trim(), els.ntfyInput.value.trim());
+  });
+  els.passInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") els.unlockBtn.click();
+  });
+
   document.querySelectorAll(".tab").forEach((btn) => {
     btn.addEventListener("click", () => {
       state.view = btn.dataset.view;
@@ -78,6 +98,15 @@ function bindUi() {
   document.getElementById("addOpenBtn").addEventListener("click", () => openDialog());
   document.getElementById("dialogCloseBtn").addEventListener("click", () => els.dialog.close());
   document.getElementById("exportIcsBtn").addEventListener("click", exportIcs);
+  document.getElementById("refreshBtn").addEventListener("click", async () => {
+    try {
+      await loadCloud(state.passphrase);
+      render();
+      flashSync("已从云端刷新");
+    } catch (err) {
+      flashSync(`刷新失败：${err.message}`, true);
+    }
+  });
 
   els.remindCheck.addEventListener("change", () => {
     els.remindWrap.classList.toggle("is-hidden", !els.remindCheck.checked);
@@ -85,7 +114,6 @@ function bindUi() {
       els.remindInput.value = defaultRemindLocal(els.dateInput.value, els.timeInput.value);
     }
   });
-
   els.dateInput.addEventListener("change", syncRemindFromDateTime);
   els.timeInput.addEventListener("change", syncRemindFromDateTime);
 
@@ -100,63 +128,80 @@ function bindUi() {
     if (!id) return;
     if (!confirm("确定删除这条事项？")) return;
     state.tasks = state.tasks.filter((t) => t.id !== id);
-    persist();
+    persistLocal();
     els.dialog.close();
     render();
   });
 }
 
-async function loadJson(url) {
+async function tryUnlock(passphrase, ntfyTopic) {
+  els.unlockError.hidden = true;
+  if (!passphrase) {
+    showUnlockError("请输入口令");
+    return;
+  }
   try {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(String(res.status));
-    return await res.json();
-  } catch {
-    return null;
+    await loadHolidays();
+    await loadCloud(passphrase);
+    state.passphrase = passphrase;
+    state.ntfyTopic = ntfyTopic;
+    saveSecrets({ passphrase, ntfyTopic });
+    els.unlockView.classList.add("is-hidden");
+    els.appRoot.classList.remove("is-hidden");
+    render();
+    flashSync(ntfyTopic ? `已解锁 · 推送主题 ${ntfyTopic}` : "已解锁 · 尚未设置推送主题");
+  } catch (err) {
+    showUnlockError(err.message || "解锁失败");
   }
 }
 
-function hydrateHolidays(payload) {
+function showUnlockError(msg) {
+  els.unlockError.hidden = false;
+  els.unlockError.textContent = msg;
+}
+
+async function loadHolidays() {
+  const payload = await loadJson("./data/holidays.json");
   state.holidayMap = new Map();
   if (!payload?.years) return;
   for (const year of Object.values(payload.years)) {
-    for (const item of year.holidays || []) {
-      state.holidayMap.set(item.date, item);
-    }
-    for (const item of year.workdays || []) {
+    for (const item of [...(year.holidays || []), ...(year.workdays || [])]) {
       state.holidayMap.set(item.date, item);
     }
   }
 }
 
-function hydrateTasks(payload) {
-  const fileTasks = Array.isArray(payload?.items) ? payload.items : [];
-  const fileUpdated = payload?.updatedAt || "";
-  if (payload?.timezone) state.timezone = payload.timezone;
+async function loadCloud(passphrase) {
+  const cacheBust = `./data/tasks.cloud.json?t=${Date.now()}`;
+  const url = PLANNER_CONFIG.cloudUrl.includes("?")
+    ? PLANNER_CONFIG.cloudUrl
+    : cacheBust;
+  const blob = await loadJson(url);
+  if (!blob) throw new Error("无法读取云端清单，请检查网络或稍后重试");
+  const payload = await decryptCloudBlob(blob, passphrase);
+  state.timezone = payload.timezone || "Asia/Shanghai";
+  state.cloudUpdatedAt = payload.updatedAt || "";
+  const cloudTasks = (payload.items || []).map(normalizeTask);
 
-  let local = null;
-  try {
-    local = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-  } catch {
-    local = null;
-  }
-
-  const localTasks = Array.isArray(local?.items) ? local.items : [];
-  const localUpdated = local?.updatedAt || "";
-
-  if (!fileTasks.length && !localTasks.length) {
-    state.tasks = [];
-    return;
-  }
-
-  // 以更新时间较新的一侧为主，再用另一侧按 id 补缺
-  const primary = localUpdated > fileUpdated ? localTasks : fileTasks;
-  const secondary = localUpdated > fileUpdated ? fileTasks : localTasks;
-  const map = new Map(primary.map((t) => [t.id, normalizeTask(t)]));
-  for (const t of secondary) {
+  // 合并本机未同步的本地改动（按 id，本机 updated 字段没有则以本机 done/title 覆盖展示）
+  const local = loadLocal();
+  const map = new Map(cloudTasks.map((t) => [t.id, t]));
+  for (const t of local?.items || []) {
     if (!map.has(t.id)) map.set(t.id, normalizeTask(t));
   }
+  // 对本机有、云端也有的：保留本机的 done 状态（方便手机勾选）
+  for (const t of local?.items || []) {
+    const cur = map.get(t.id);
+    if (cur && t.done !== cur.done) cur.done = t.done;
+  }
   state.tasks = [...map.values()].sort(sortTasks);
+  persistLocal();
+}
+
+async function loadJson(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`读取失败 (${res.status})`);
+  return res.json();
 }
 
 function normalizeTask(raw) {
@@ -173,16 +218,48 @@ function normalizeTask(raw) {
   };
 }
 
-function persist() {
-  const payload = {
-    timezone: state.timezone,
-    updatedAt: nowIso(),
-    items: state.tasks,
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+function persistLocal() {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      timezone: state.timezone,
+      updatedAt: nowIso(),
+      cloudUpdatedAt: state.cloudUpdatedAt,
+      items: state.tasks,
+    })
+  );
+}
+
+function loadLocal() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function saveSecrets(secrets) {
+  localStorage.setItem(SECRET_KEY, JSON.stringify(secrets));
+}
+
+function loadSecrets() {
+  try {
+    return JSON.parse(localStorage.getItem(SECRET_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function flashSync(text, isError = false) {
+  els.syncBar.textContent = text;
+  els.syncBar.classList.toggle("is-error", isError);
 }
 
 function render() {
+  const ntfy = state.ntfyTopic
+    ? `推送：ntfy.sh/${state.ntfyTopic}`
+    : "未设置推送主题";
+  flashSync(`云端更新：${state.cloudUpdatedAt || "未知"} · ${ntfy} · 共 ${state.tasks.length} 项`);
   if (state.view === "list") renderList();
   else renderCalendar();
 }
@@ -202,26 +279,19 @@ function renderList() {
     .sort(sortTasks)
     .slice(0, 3);
 
-  if (upcoming.length) {
-    els.upcomingBox.innerHTML = `
-      <div class="upcoming-card">
-        <h3>即将到来</h3>
-        <ul>
-          ${upcoming
-            .map(
-              (t) =>
-                `<li><strong>${escapeHtml(t.title)}</strong> · ${formatWhen(t)} · ${CATEGORY_LABEL[t.category]}</li>`
-            )
-            .join("")}
-        </ul>
-      </div>`;
-  } else {
-    els.upcomingBox.innerHTML = "";
-  }
+  els.upcomingBox.innerHTML = upcoming.length
+    ? `<div class="upcoming-card"><h3>即将到来</h3><ul>${upcoming
+        .map(
+          (t) =>
+            `<li><strong>${escapeHtml(t.title)}</strong> · ${formatWhen(t)} · ${CATEGORY_LABEL[t.category]}</li>`
+        )
+        .join("")}</ul></div>`
+    : "";
 
   const items = filteredTasks().sort(sortTasks);
   if (!items.length) {
-    els.taskList.innerHTML = `<div class="empty">还没有事项。<br />直接告诉我，或点右上角「添加」。</div>`;
+    els.taskList.innerHTML =
+      `<div class="empty">还没有事项。<br />直接在对话里告诉我，或点右上角「添加」。</div>`;
     return;
   }
 
@@ -250,7 +320,7 @@ function renderList() {
       const task = state.tasks.find((t) => t.id === id);
       if (!task) return;
       task.done = !task.done;
-      persist();
+      persistLocal();
       render();
     });
     node.addEventListener("click", () => openDialog(id));
@@ -263,10 +333,10 @@ function renderCalendar() {
   els.monthLabel.textContent = `${year}年${month + 1}月`;
 
   const first = new Date(year, month, 1);
-  const startOffset = (first.getDay() + 6) % 7; // 周一开始
+  const startOffset = (first.getDay() + 6) % 7;
   const gridStart = new Date(year, month, 1 - startOffset);
-
   const cells = [];
+
   for (let i = 0; i < 42; i += 1) {
     const d = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
     const key = formatDate(d);
@@ -288,14 +358,13 @@ function renderCalendar() {
       <button type="button" class="${classes}" data-date="${key}">
         <span class="day-num">${d.getDate()}</span>
         ${meta ? `<span class="day-flag">${escapeHtml(shortHolidayName(meta))}</span>` : ""}
-        <span class="day-dots">
-          ${dayTasks
-            .slice(0, 3)
-            .map((t) => `<i class="${t.category}"></i>`)
-            .join("")}
-        </span>
+        <span class="day-dots">${dayTasks
+          .slice(0, 3)
+          .map((t) => `<i class="${t.category}"></i>`)
+          .join("")}</span>
       </button>`);
   }
+
   els.calendarGrid.innerHTML = cells.join("");
   els.calendarGrid.querySelectorAll(".day-cell").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -381,25 +450,22 @@ function saveFromForm() {
     done: existing?.done || false,
     createdAt: existing?.createdAt || nowIso(),
   };
-
   if (!next.title) return;
   if (existing) Object.assign(existing, next);
   else state.tasks.push(next);
   state.tasks.sort(sortTasks);
-  persist();
+  persistLocal();
   render();
 }
 
 function syncRemindFromDateTime() {
-  if (!els.remindCheck.checked) return;
-  if (!els.dateInput.value) return;
+  if (!els.remindCheck.checked || !els.dateInput.value) return;
   els.remindInput.value = defaultRemindLocal(els.dateInput.value, els.timeInput.value);
 }
 
 function defaultRemindLocal(date, time) {
   if (!date) return "";
-  if (time) return `${date}T${time}`;
-  return `${date}T09:00`;
+  return time ? `${date}T${time}` : `${date}T09:00`;
 }
 
 function exportIcs() {
@@ -513,8 +579,7 @@ function formatDate(d) {
 
 function addDaysYmd(ymd, days) {
   const [y, m, d] = ymd.split("-").map(Number);
-  const dt = new Date(y, m - 1, d + days);
-  return formatDate(dt);
+  return formatDate(new Date(y, m - 1, d + days));
 }
 
 function nowIso() {
@@ -537,7 +602,6 @@ function toLocalInput(iso) {
 }
 
 function fromLocalInput(local) {
-  // 按东八区解释本地输入
   return `${local}:00+08:00`;
 }
 
@@ -567,7 +631,6 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;");
 }
 
-// 日历详情里的按钮样式
 const style = document.createElement("style");
 style.textContent = `.linkish{border:0;background:none;padding:0;color:inherit;cursor:pointer;text-align:left;font:inherit}.linkish:hover{color:var(--sea-mid)}`;
 document.head.appendChild(style);

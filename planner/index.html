@@ -7,7 +7,10 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <meta name="theme-color" content="#0f2a24" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="日次" />
     <title>日次 · 生活与工作清单</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -18,17 +21,44 @@
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
-    <div class="app">
+
+    <section id="unlockView" class="unlock">
+      <div class="unlock-card">
+        <p class="brand">日次</p>
+        <p class="tagline">生活与工作，按日安顿</p>
+        <p class="unlock-copy">
+          数据加密保存在云端，手机和 Windows 用同一口令解锁。电脑关机也能用。
+        </p>
+        <label>
+          解锁口令
+          <input id="passInput" type="password" autocomplete="current-password" placeholder="输入我发给你的口令" />
+        </label>
+        <label>
+          手机推送主题（可选，用于到点提醒）
+          <input id="ntfyInput" type="text" placeholder="例如 rici-xxxxxxxx" />
+        </label>
+        <button type="button" id="unlockBtn" class="primary-btn grow">解锁并同步</button>
+        <p id="unlockError" class="error" hidden></p>
+        <p class="hint">
+          苹果手机若要推送提醒：App Store 安装「ntfy」，订阅上面的主题。
+        </p>
+      </div>
+    </section>
+
+    <div id="appRoot" class="app is-hidden">
       <header class="top">
         <div class="brand-block">
           <p class="brand">日次</p>
           <p class="tagline">生活与工作，按日安顿</p>
         </div>
         <div class="top-actions">
-          <button type="button" id="exportIcsBtn" class="ghost-btn">导出提醒</button>
+          <button type="button" id="refreshBtn" class="ghost-btn">刷新云端</button>
+          <button type="button" id="exportIcsBtn" class="ghost-btn">导出日历</button>
           <button type="button" id="addOpenBtn" class="primary-btn">添加</button>
         </div>
       </header>
+
+      <p id="syncBar" class="sync-bar"></p>
 
       <nav class="tabs" aria-label="主视图">
         <button type="button" class="tab is-active" data-view="list">清单</button>
@@ -95,7 +125,7 @@
         </div>
         <label class="check-label">
           <input id="remindCheck" type="checkbox" />
-          到点提醒（写入提醒时间，可导出到手机日历）
+          到点提醒（可导出到手机日历；对话里添加的也会尝试推送）
         </label>
         <label id="remindWrap" class="is-hidden">
           提醒时间
@@ -107,8 +137,11 @@
         </label>
         <div class="sheet-actions">
           <button type="button" id="deleteBtn" class="danger-btn is-hidden">删除</button>
-          <button type="submit" class="primary-btn grow">保存</button>
+          <button type="submit" class="primary-btn grow">保存到本机</button>
         </div>
+        <p class="hint">
+          网页上的修改先保存在本机。要长期双端一致，请在对话里告诉我「同步这些修改」，或直接让我帮你添加事项。
+        </p>
       </form>
     </dialog>
 

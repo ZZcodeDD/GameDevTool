@@ -1,71 +1,75 @@
 # 日次 · 生活与工作清单
 
-面向手机的个人清单 + 日历工具，支持：
+手机（苹果）和 Windows 都能用，**不要求工作电脑一直开机**。
 
-- 生活 / 工作分类
-- 日期与日历月视图
-- 指定日期时间提醒（可导出到手机系统日历）
-- 中国法定节假日与调休上班标记（已内置 2025、2026）
+## 怎么协作（最省事）
 
-## 为什么这样设计
+你在 Cursor 对话里用自然语言告诉我，例如：
 
-当前仓库 `GameDevTool` 是**公开仓库**，所以：
-
-- 工具代码可以放在 `planner/`
-- 你的真实事项写在 `planner/data/tasks.json`，该文件已加入 `.gitignore`，**不会提交到 GitHub**
-- 浏览器里改动的事项会先保存在本机 `localStorage`
-
-## 最方便的长期协作方式
-
-你只需要在对话里用自然语言告诉我，例如：
-
-> 下周三下午 3 点交方案，周末买菜，周五早上 9 点提醒我交社保
+> 下周三下午 3 点交方案，周末买菜，明天早上 9 点提醒我交社保
 
 我会：
 
-1. 自动分成「工作 / 生活」
-2. 写入本地清单数据
-3. 需要提醒时补上提醒时间
-4. 回复你已添加的摘要
+1. 分成「生活 / 工作」
+2. 加密写入云端清单并推送
+3. 需要提醒时，到点给你手机推送（ntfy），也可导出到系统日历
 
-你也可以自己在页面上点「添加」维护。
+## 双端怎么用（电脑关机也行）
 
-## 本地打开
+### 1. 打开清单网页
 
-在仓库根目录执行：
+把本仓库的 `planner/` 用下面任一方式打开（任选其一）：
+
+**方式 A（推荐，一次设置）**  
+GitHub 仓库 → Settings → Pages → Build and deployment → Source 选 `Deploy from a branch` → Branch 选合并后的默认分支，Folder 选 `/planner`（若界面只能选 `/` 或 `/docs`，则把 Pages 指到 `/docs` 并把内容同步过去，或用方式 B）。
+
+**方式 B（立刻可用）**  
+用 jsDelivr 打开当前分支上的页面（分支合并后把分支名改成 `master`）：
+
+`https://cdn.jsdelivr.net/gh/ZZcodeDD/GameDevTool@cursor/personal-planner-2d68/planner/index.html`
+
+Windows 浏览器收藏；iPhone Safari 打开后可「分享 → 添加到主屏幕」。
+
+### 2. 解锁口令
+
+口令由我私下发给你（不会写进公开仓库明文事项）。  
+手机和 Windows **各输入一次**，会记在该设备浏览器里。
+
+云端文件 `data/tasks.cloud.json` 只有密文；公开仓库里看不到你的事项原文。
+
+### 3. 苹果手机推送提醒
+
+1. App Store 安装免费应用 **ntfy**
+2. 订阅我发给你的主题（形如 `rici-xxxxxxxx`）
+3. 保持通知权限开启
+
+到点后由云端助手推送，**不依赖你的 Windows 开机**。
+
+若你更习惯系统日历：在网页点「导出日历」，把 `.ics` 导入 iPhone「日历」或 Google 日历。
+
+## 本地开发
 
 ```bash
 cd planner
 python3 -m http.server 5173
 ```
 
-手机和电脑浏览器打开：
+浏览器打开 `http://localhost:5173`，用口令解锁。
 
-`http://localhost:5173`
+维护者加密同步：
 
-若要在同一 Wi-Fi 下用手机访问电脑，把 `localhost` 换成电脑局域网 IP。
+```bash
+# 先编辑 data/tasks.json（此文件已 gitignore）
+node sync.mjs
+```
 
-## 手机真正响铃/推送提醒
+## 数据说明
 
-Cursor 对话里的提醒，只能在对话里叫醒我，不能替代手机通知。
+| 文件 | 是否提交 | 说明 |
+| --- | --- | --- |
+| `data/tasks.json` | 否 | 明文工作副本，仅本地/助手环境 |
+| `data/tasks.cloud.json` | 是 | 加密后的云端数据，双端读取 |
+| `data/holidays.json` | 是 | 中国法定节假日与调休（2025–2026） |
+| `data/tasks.example.json` | 是 | 字段示例 |
 
-请这样用手机日历：
-
-1. 在「日次」页面点 **导出提醒**
-2. 打开下载的 `.ics` 文件
-3. 导入到系统日历 / Google 日历 / 苹果日历
-4. 由手机系统按时提醒你
-
-## 数据格式
-
-见 `data/tasks.example.json`。核心字段：
-
-| 字段 | 说明 |
-| --- | --- |
-| `category` | `life` 生活 / `work` 工作 |
-| `date` | `YYYY-MM-DD` |
-| `time` | `HH:mm`（可选） |
-| `remindAt` | ISO 时间，含时区，如 `2026-10-02T16:30:00+08:00` |
-| `done` | 是否完成 |
-
-节假日数据在 `data/holidays.json`，依据国务院办公厅通知整理。
+字段：`category`=`life`/`work`，`date`，`time`，`remindAt`，`done`。
