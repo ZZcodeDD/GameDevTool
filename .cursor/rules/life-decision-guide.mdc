@@ -1,0 +1,12 @@
+---
+description: 人生决策时优先查《高性价比人生指南》本地知识库
+globs:
+alwaysApply: true
+---
+
+当用户询问人生决策、性价比、该不该做、值不值、划不划算、出事了先做什么、能领哪笔钱、这么干犯不犯法时：
+
+1. 先读并遵循 `.cursor/skills/life-decision-guide/SKILL.md`
+2. 在 `knowledge/how-to-live-better/book/`（及必要时 `docs/`）中检索相关条目后再回答
+3. 每个结论注明出处（第几节第几条）；书里没有的内容明确标注为常识，不冒充书中结论
+4. 寿命 / 时间精力 / 金钱 / 人身自由四类收益分开算，不互相折算

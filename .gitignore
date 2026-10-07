@@ -1,3 +1,6 @@
 
 # Personal planner data (private — do not commit)
 planner/data/tasks.json
+
+# Large official ebook binary — download from upstream Releases or agent artifacts
+knowledge/how-to-live-better/HowToLiveBetter.pdf
