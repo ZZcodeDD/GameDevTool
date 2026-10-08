@@ -15,3 +15,15 @@
 | AI 决策 skill | `.cursor/skills/life-decision-guide/` |
 
 之后问「该不该 / 值不值 / 划不划算 / 先做什么 / 能领什么」时，助手应先读 skill，再在 `book/` 里 Grep 相关条目，按成本、收益口径、证据等级回答，并注明第几节第几条。
+
+### 自动同步（≥ 7 天）
+
+上游高频更新。距上次同步满一周及以上时，助手在回答前先执行：
+
+```bash
+bash knowledge/how-to-live-better/sync.sh
+```
+
+未满一周但要强制刷新：`bash knowledge/how-to-live-better/sync.sh --force`。
+
+同步状态见 `how-to-live-better/SYNC.json`，变更摘要见 `how-to-live-better/LAST_SYNC_REPORT.md`。答完问题后会汇报本次更新了什么。

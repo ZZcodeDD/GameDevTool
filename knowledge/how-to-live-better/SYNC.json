@@ -1,0 +1,15 @@
+{
+  "upstream": "https://github.com/eternity4719/HowToLiveBetter",
+  "upstream_ref": "main",
+  "upstream_sha": "54ac92204e7abb031567590cb6e42874428ed9d3",
+  "upstream_commit_date": "2026-10-08T10:48:06+08:00",
+  "upstream_commit_message": "按 issue #94 补第 1 节第 43 条：直接问身边情绪不对的人有没有想过自杀，问了不会让他更想（B：Gould 2005 随机试验、Polihronis 2022 荟萃）；第 1 节第 32 条、第 8 节第 15 条加反向指路，节首导览挂进心理危机；控制自己情绪的部分第 3 节已有，不重复；统计同步",
+  "previous_upstream_sha": null,
+  "synced_at": "2026-10-08T03:07:15Z",
+  "entry_count": 671,
+  "last_diff": {
+    "added": 0,
+    "removed": 0,
+    "modified": 14
+  }
+}

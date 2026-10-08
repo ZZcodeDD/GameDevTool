@@ -22,11 +22,9 @@ description: 用《高性价比人生指南》(github.com/eternity4719/HowToLive
 
 ## 第 1 步：把正文拿到手
 
-**本仓库本地知识库（优先）**：工作区里的 `knowledge/how-to-live-better/`。该目录含完整 `book/`、`docs/`、`README.md`、`index.html`。把下面命令里的路径都相对到这个目录，或先 `cd knowledge/how-to-live-better`。
+**本地**：当前目录或上级目录里有 `README.md` 和 `book/01-不要早死.md`，就是本地模式，直接读。
 
-**其他本地副本**：当前目录或上级目录里有 `README.md` 和 `book/01-不要早死.md`，也是本地模式，直接读。
-
-**远程**：没有就现取。整本约 1.3 MB，浅克隆一次最省事：
+**远程**：没有就现取。整本 1.3 MB，浅克隆一次最省事，后面所有命令都能照常用：
 
 ```bash
 git clone --depth 1 https://github.com/eternity4719/HowToLiveBetter.git "${TMPDIR:-/tmp}/hltb"
@@ -38,25 +36,24 @@ git clone --depth 1 https://github.com/eternity4719/HowToLiveBetter.git "${TMPDI
 curl -fsSL --compressed "https://raw.githubusercontent.com/eternity4719/HowToLiveBetter/main/book/02-不要慢慢死.md"
 ```
 
-这些都走不通，就说明取不到正文，如实告诉用户，不要凭印象复述书的内容。
+这两条都走不通，就说明取不到正文，如实告诉用户，不要凭印象复述书的内容。
 
 ## 第 2 步：定位到节
 
-先挑 1 到 3 节：读知识库根目录 `README.md` 里「这本书想回答的问题」那张表（一节一行，写明这一节回答什么问题，并带着 `book/` 下对应的文件名），按用户问的事对上号。节的增删都反映在那张表里，这里不另留一份清单。
+先挑 1 到 3 节：读仓库根目录 `README.md` 里「这本书想回答的问题」那张表（一节一行，写明这一节回答什么问题，并带着 `book/` 下对应的文件名），按用户问的事对上号。节的增删都反映在那张表里，这里不另留一份清单。
 
-节文件就在 `book/` 下，文件名自带节号和节名，`ls knowledge/how-to-live-better/book/` 也能看全。
+节文件就在 `book/` 下，文件名自带节号和节名，`ls book/` 也能看全。
 
 长文在 `docs/`：结婚划不划算、家庭应急装备清单、做平台要办哪些证、遇到陌生人出事该不该停。
 
 ## 第 3 步：把条目捞出来
 
-节文件最大的有 110 KB，别整篇读，按关键词捞。有 Grep / Read 这类工具就用工具，只有 shell 就用命令（路径按本仓库知识库）：
+节文件最大的有 110 KB，别整篇读，按关键词捞。有 Grep / Read 这类工具就用工具，只有 shell 就用命令：
 
 ```bash
-KB=knowledge/how-to-live-better
-grep -rn '^### ' "$KB/book/" | grep -E '关键词1|关键词2'        # 先看有哪些条目标题
-grep -rn -B2 -A8 '关键词' "$KB/book/08-别把自己搭进去.md"        # 正文里搜，带上下文
-sed -n '/^### 16\. /,/^### 17\. /p' "$KB/book/08-别把自己搭进去.md"  # 按条号抽一整条
+grep -rn '^### ' book/ | grep -E '关键词1|关键词2'        # 先看有哪些条目标题
+grep -rn -B2 -A8 '关键词' book/08-别把自己搭进去.md        # 正文里搜，带上下文
+sed -n '/^### 16\. /,/^### 17\. /p' book/08-别把自己搭进去.md  # 按条号抽一整条
 ```
 
 **抽出来的条目要整条读完**，尤其是「备注」栏——适用人群、争议、例外都写在那里，只读标题会把条件丢掉。
