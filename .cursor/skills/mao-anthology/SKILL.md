@@ -5,6 +5,8 @@ description: 用本地《毛泽东选集》知识库（NpTIme/MaoZeDongAnthology
 
 # 毛泽东选集：查原文再答
 
+这是相对静态的历史文献库，**回答前不要同步更新**；直接查本地副本即可。
+
 ## 知识库位置
 
 `knowledge/mao-zedong-anthology/`
@@ -14,17 +16,6 @@ description: 用本地《毛泽东选集》知识库（NpTIme/MaoZeDongAnthology
 | `volumes/` | 七卷 Markdown 正文 |
 | `catalog.json` | 卷 / 篇目录 |
 | `index.html` | 可读 HTML（章节、检索、注释跳转） |
-| `SYNC.json` | 上次同步时间 |
-
-## 回答前是否同步
-
-若 `SYNC.json` 不存在，或 `synced_at` 距现在 ≥ 7 天：先执行
-
-```bash
-bash knowledge/mao-zedong-anthology/sync.sh
-```
-
-强制刷新：`bash knowledge/mao-zedong-anthology/sync.sh --force`。答完后简要说明是否同步及变更。
 
 ## 怎么查
 
@@ -38,7 +29,6 @@ bash knowledge/mao-zedong-anthology/sync.sh
 ```bash
 KB=knowledge/mao-zedong-anthology
 grep -RIn '矛盾' "$KB/volumes" --include='*.md' | head
-grep -RIn '^# ' "$KB/catalog.json"  # 或直接读 catalog.json
 ```
 
 ## 怎么写答复

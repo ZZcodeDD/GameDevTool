@@ -7,7 +7,6 @@ alwaysApply: true
 当用户询问毛泽东选集、毛选原文、相关篇目含义、注释或要求引用毛选时：
 
 1. 先读并遵循 `.cursor/skills/mao-anthology/SKILL.md`
-2. 若 `knowledge/mao-zedong-anthology/SYNC.json` 不存在或距今 ≥ 7 天：先运行 `bash knowledge/mao-zedong-anthology/sync.sh`
+2. **不要先同步更新**——毛选视为静态知识库，直接查阅本地副本
 3. 在 `knowledge/mao-zedong-anthology/volumes/` 检索原文后再答，注明卷次与篇名
 4. 第六、七卷标明「非官方·静火整理」
-5. 答复末尾可简要说明本次是否同步及更新内容

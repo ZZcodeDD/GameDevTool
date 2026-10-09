@@ -21,6 +21,7 @@ python3 knowledge/mao-zedong-anthology/tools/build_reader.py
 - Skill：`.cursor/skills/mao-anthology/SKILL.md`
 - 正文：`volumes/`
 - 目录：`catalog.json`
-- 同步：`bash knowledge/mao-zedong-anthology/sync.sh`（≥7 天自动；`--force` 强制）
+
+毛选视为**静态知识库**：回答相关问题前**不自动同步**，直接查本地原文。若以后要手动刷新上游，可自行运行 `bash knowledge/mao-zedong-anthology/sync.sh --force`。
 
 第六、七卷为非官方整理，引用时须标明。详见 [`ATTRIBUTION.md`](./ATTRIBUTION.md)。

@@ -24,6 +24,5 @@
 | 正文 | `mao-zedong-anthology/volumes/` |
 | 可检索 HTML（章节 / 注释跳转） | `mao-zedong-anthology/index.html`（`python3 tools/build_reader.py`） |
 | AI skill | `.cursor/skills/mao-anthology/` |
-| 同步 | `bash knowledge/mao-zedong-anthology/sync.sh`（≥7 天） |
 
-涉及毛选原文时，助手先检索 `volumes/` 再答，并注明卷次与篇名；第六、七卷标明非官方。
+涉及毛选原文时，助手**直接**检索 `volumes/` 再答（不先同步），并注明卷次与篇名；第六、七卷标明非官方。毛选视为静态知识，与人生指南的周更策略不同。
