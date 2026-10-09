@@ -1,0 +1,15 @@
+{
+  "upstream": "https://github.com/NpTIme/MaoZeDongAnthology",
+  "upstream_ref": "main",
+  "upstream_sha": "a94df99253051d5228a6d7f6598cdf4c5236c0dd",
+  "upstream_commit_date": "2025-11-19T14:47:16+08:00",
+  "upstream_commit_message": "Update README.md",
+  "previous_upstream_sha": null,
+  "synced_at": "2026-10-09T06:32:43Z",
+  "article_count": 392,
+  "last_diff": {
+    "added": 392,
+    "removed": 0,
+    "modified": 0
+  }
+}
