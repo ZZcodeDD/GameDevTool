@@ -4,26 +4,26 @@
 
 路径：[`how-to-live-better/`](./how-to-live-better/)
 
-本地镜像了 [eternity4719/HowToLiveBetter](https://github.com/eternity4719/HowToLiveBetter)（CC BY 4.0）：670 条有据可查的生活建议，用于在本仓库里直接检索、辅助决策。
+本地镜像了 [eternity4719/HowToLiveBetter](https://github.com/eternity4719/HowToLiveBetter)（CC BY 4.0）：有据可查的生活建议，用于检索、辅助决策。
 
 | 用途 | 位置 |
 | --- | --- |
 | 正文条目 | `how-to-live-better/book/` |
 | 场景长文 | `how-to-live-better/docs/` |
-| 章节目录与问题表 | `how-to-live-better/README.md` |
-| 官方 PDF（学习阅读） | `how-to-live-better/HowToLiveBetter.pdf` |
 | AI 决策 skill | `.cursor/skills/life-decision-guide/` |
+| 同步 | `bash knowledge/how-to-live-better/sync.sh`（≥7 天） |
 
-之后问「该不该 / 值不值 / 划不划算 / 先做什么 / 能领什么」时，助手应先读 skill，再在 `book/` 里 Grep 相关条目，按成本、收益口径、证据等级回答，并注明第几节第几条。
+## 毛泽东选集
 
-### 自动同步（≥ 7 天）
+路径：[`mao-zedong-anthology/`](./mao-zedong-anthology/)
 
-上游高频更新。距上次同步满一周及以上时，助手在回答前先执行：
+本地镜像了 [NpTIme/MaoZeDongAnthology](https://github.com/NpTIme/MaoZeDongAnthology)：官方五卷 + 静火非官方两卷，约 392 篇。
 
-```bash
-bash knowledge/how-to-live-better/sync.sh
-```
+| 用途 | 位置 |
+| --- | --- |
+| 正文 | `mao-zedong-anthology/volumes/` |
+| 可检索 HTML（章节 / 注释跳转） | `mao-zedong-anthology/index.html`（`python3 tools/build_reader.py`） |
+| AI skill | `.cursor/skills/mao-anthology/` |
+| 同步 | `bash knowledge/mao-zedong-anthology/sync.sh`（≥7 天） |
 
-未满一周但要强制刷新：`bash knowledge/how-to-live-better/sync.sh --force`。
-
-同步状态见 `how-to-live-better/SYNC.json`，变更摘要见 `how-to-live-better/LAST_SYNC_REPORT.md`。答完问题后会汇报本次更新了什么。
+涉及毛选原文时，助手先检索 `volumes/` 再答，并注明卷次与篇名；第六、七卷标明非官方。
