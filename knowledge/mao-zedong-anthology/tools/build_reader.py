@@ -404,7 +404,10 @@ def build_learn_pages(articles: list[Article], catalog: dict) -> tuple[str, str]
         '<a class="learn-nav-a" href="#learn-thread" data-learn="learn-thread">总脉络：四句方法</a>',
         '<a class="learn-nav-a" href="#learn-timeline" data-learn="learn-timeline">时间线：局面与方针</a>',
         '<a class="learn-nav-a" href="#learn-l1" data-learn="learn-l1">第一层：坐标系（必读）</a>',
-        '<a class="learn-nav-a" href="#learn-l2" data-learn="learn-l2">第二层：专题线</a>',
+        '<div class="nav-fold open" data-fold="themes">',
+        '<button type="button" class="nav-fold-btn" aria-expanded="true"><span>第二层：专题线</span><i class="chev"></i></button>',
+        '<div class="nav-fold-body">',
+        '<a class="learn-nav-a sub" href="#learn-l2" data-learn="learn-l2">专题总览</a>',
     ]
     for tid, title, _, _ in LEARN_THEMES:
         nav.append(
@@ -412,9 +415,10 @@ def build_learn_pages(articles: list[Article], catalog: dict) -> tuple[str, str]
             f'data-learn="learn-theme-{html.escape(tid)}">{html.escape(title)}</a>'
         )
     nav += [
+        "</div></div>",
         '<a class="learn-nav-a" href="#learn-l3" data-learn="learn-l3">第三层：按卷索引</a>',
         '<a class="learn-nav-a" href="#learn-discipline" data-learn="learn-discipline">阅读纪律</a>',
-        '<div class="side-label" style="margin-top:18px">分卷目录</div>',
+        '<div class="side-label dim">分卷目录 <button type="button" class="linkish" id="collapseAllVols">全部折叠</button></div>',
         "</div>",
     ]
 
@@ -424,16 +428,28 @@ def build_learn_pages(articles: list[Article], catalog: dict) -> tuple[str, str]
     # overview
     pages.append(
         f"""<section class="learn-page" id="learn-overview">
-<header><div class="crumb">结构化学习</div><h1>怎么学毛选</h1></header>
+<header><div class="crumb">结构化学习</div><h1>怎么学毛选</h1>
+<p class="subhead">局面 → 问题 → 方法 · 分层聚焦，不要通篇硬啃</p></header>
 <div class="learn-body">
-<p class="lead">毛选不是散文集，而是<strong>党在不同危局里怎么看局面、定方针</strong>的实录。建议按「局面 → 问题 → 方法」分层学，不要按页从头硬啃。</p>
+<p class="lead">毛选不是散文集，而是<strong class="hi">党在不同危局里怎么看局面、定方针</strong>的实录。</p>
+<div class="logic-flow tier-a" aria-label="学习路径逻辑图">
+  <div class="lf-node primary">总脉络<br><small>四句方法</small></div>
+  <div class="lf-arrow"></div>
+  <div class="lf-node">时间线<br><small>局面对照</small></div>
+  <div class="lf-arrow"></div>
+  <div class="lf-node accent">第一层<br><small>8 篇坐标系</small></div>
+  <div class="lf-arrow"></div>
+  <div class="lf-node">第二层<br><small>六条专题</small></div>
+  <div class="lf-arrow"></div>
+  <div class="lf-node muted">第三层<br><small>七卷索引</small></div>
+</div>
 <div class="learn-cards">
-  <a class="learn-card" href="#learn-thread" data-learn="learn-thread"><span class="n">01</span><strong>总脉络</strong><span>四句方法压成操作系统</span></a>
-  <a class="learn-card" href="#learn-timeline" data-learn="learn-timeline"><span class="n">02</span><strong>时间线</strong><span>局面与方针对照表</span></a>
-  <a class="learn-card" href="#learn-l1" data-learn="learn-l1"><span class="n">03</span><strong>第一层</strong><span>8 篇建坐标系（必读）</span></a>
-  <a class="learn-card" href="#learn-l2" data-learn="learn-l2"><span class="n">04</span><strong>第二层</strong><span>六条专题线加深</span></a>
-  <a class="learn-card" href="#learn-l3" data-learn="learn-l3"><span class="n">05</span><strong>第三层</strong><span>七卷当编年索引</span></a>
-  <a class="learn-card" href="#learn-discipline" data-learn="learn-discipline"><span class="n">06</span><strong>纪律</strong><span>怎么读才不空转</span></a>
+  <a class="learn-card c1" href="#learn-thread" data-learn="learn-thread"><span class="n">01</span><strong>总脉络</strong><span>四句方法压成操作系统</span></a>
+  <a class="learn-card c2" href="#learn-timeline" data-learn="learn-timeline"><span class="n">02</span><strong>时间线</strong><span>局面与方针对照</span></a>
+  <a class="learn-card c3" href="#learn-l1" data-learn="learn-l1"><span class="n">03</span><strong>第一层</strong><span>8 篇建坐标系（必读）</span></a>
+  <a class="learn-card c2" href="#learn-l2" data-learn="learn-l2"><span class="n">04</span><strong>第二层</strong><span>六条专题线加深</span></a>
+  <a class="learn-card c4" href="#learn-l3" data-learn="learn-l3"><span class="n">05</span><strong>第三层</strong><span>七卷当编年索引</span></a>
+  <a class="learn-card c4" href="#learn-discipline" data-learn="learn-discipline"><span class="n">06</span><strong>纪律</strong><span>怎么读才不空转</span></a>
 </div>
 <div class="callout">官方一至五卷为主；第六、七卷为非官方静火整理，入门不做主线。读每篇只记三栏：<strong>局面 / 判断 / 办法</strong>。</div>
 </div></section>"""
@@ -442,33 +458,60 @@ def build_learn_pages(articles: list[Article], catalog: dict) -> tuple[str, str]
     # thread
     pages.append(
         """<section class="learn-page" id="learn-thread">
-<header><div class="crumb">结构化学习 · 总脉络</div><h1>贯穿始终的四句方法</h1></header>
+<header><div class="crumb">结构化学习 · 总脉络</div><h1>贯穿始终的四句方法</h1>
+<p class="subhead">先装操作系统，再读具体战争与政策</p></header>
 <div class="learn-body">
 <ol class="method-list">
-  <li><strong>分清敌我友</strong><span>谁是依靠、谁是联合、谁是打击</span></li>
-  <li><strong>从实际出发</strong><span>反对本本；调查；实践检验</span></li>
-  <li><strong>抓主要矛盾</strong><span>不同阶段换主要矛盾，策略跟着换</span></li>
-  <li><strong>组织起来落地</strong><span>群众、根据地、统一战线、党的作风</span></li>
+  <li class="m1"><strong>分清敌我友</strong><span>谁是依靠、谁是联合、谁是打击</span></li>
+  <li class="m2"><strong>从实际出发</strong><span>反对本本；调查；实践检验</span></li>
+  <li class="m3"><strong>抓主要矛盾</strong><span>不同阶段换主要矛盾，策略跟着换</span></li>
+  <li class="m4"><strong>组织起来落地</strong><span>群众、根据地、统一战线、党的作风</span></li>
 </ol>
-<pre class="mindmap">敌我友分析
-    ↓
-农村根据地 + 武装斗争 + 统一战线
-    ↓
-用《实践论》《矛盾论》校准认识与策略
-    ↓
-抗战：持久战 / 游击战 / 新民主主义
-    ↓
-整风：把党建成能执行路线的组织
-    ↓
-解放战争胜利 → 人民民主专政
-    ↓
-执政：十大关系、人民内部矛盾</pre>
-<p>读任何一篇，先问三句：当时<strong>主要矛盾</strong>是什么？他要<strong>团结谁、打击谁</strong>？用什么<strong>组织形式</strong>落地？</p>
-<p><a class="learn-nav-a inline" href="#learn-l1" data-learn="learn-l1">下一步：第一层坐标系 →</a></p>
+<div class="diagram-panel tier-b">
+  <div class="diagram-title">历史推进逻辑</div>
+  <div class="flow-col">
+    <div class="flow-step s1"><b>敌我友</b><span>认清依靠与打击</span></div>
+    <div class="flow-join"></div>
+    <div class="flow-step s2"><b>三结合</b><span>根据地 · 武装 · 统一战线</span></div>
+    <div class="flow-join"></div>
+    <div class="flow-step s3"><b>认识论</b><span>实践论 · 矛盾论校准</span></div>
+    <div class="flow-join"></div>
+    <div class="flow-row">
+      <div class="flow-step s2"><b>抗战</b><span>持久 / 游击 / 新民主主义</span></div>
+      <div class="flow-step s3"><b>整风</b><span>学风党风文风</span></div>
+    </div>
+    <div class="flow-join"></div>
+    <div class="flow-step s1"><b>建国</b><span>人民民主专政</span></div>
+    <div class="flow-join"></div>
+    <div class="flow-step s4"><b>执政</b><span>十大关系 · 人民内部矛盾</span></div>
+  </div>
+</div>
+<div class="diagram-panel tier-c">
+  <div class="diagram-title">读一篇时的三问（思维导图）</div>
+  <div class="mind-map">
+    <div class="mm-center">这一篇</div>
+    <div class="mm-branch b1"><span class="mm-label">局面</span><span class="mm-text">主要矛盾是什么？</span></div>
+    <div class="mm-branch b2"><span class="mm-label">敌我</span><span class="mm-text">团结谁、打击谁？</span></div>
+    <div class="mm-branch b3"><span class="mm-label">落地</span><span class="mm-text">用什么组织与方法？</span></div>
+  </div>
+</div>
+<p class="next-link"><a href="#learn-l1" data-learn="learn-l1">下一步：第一层坐标系 →</a></p>
 </div></section>"""
     )
 
-    # timeline
+    # timeline as visual rail + foldable table
+    rail = []
+    for i, (stage, years, situ, q, titles) in enumerate(LEARN_TIMELINE, 1):
+        links = "".join(art_link(articles, t) for t in titles)
+        rail.append(
+            f'<div class="tl-item"><div class="tl-dot"></div>'
+            f'<div class="tl-card"><div class="tl-meta"><span class="tl-no">{i:02d}</span>'
+            f'<span class="tl-years">{html.escape(years)}</span></div>'
+            f'<h3>{html.escape(stage)}</h3>'
+            f'<p class="tl-situ">{html.escape(situ)}</p>'
+            f'<p class="tl-q"><span>核心问题</span>{html.escape(q)}</p>'
+            f'<div class="tl-arts">{links}</div></div></div>'
+        )
     rows = []
     for stage, years, situ, q, titles in LEARN_TIMELINE:
         links = "".join(art_link(articles, t) for t in titles)
@@ -479,13 +522,18 @@ def build_learn_pages(articles: list[Article], catalog: dict) -> tuple[str, str]
         )
     pages.append(
         f"""<section class="learn-page" id="learn-timeline">
-<header><div class="crumb">结构化学习 · 时间线</div><h1>局面与方针对照</h1></header>
+<header><div class="crumb">结构化学习 · 时间线</div><h1>局面与方针对照</h1>
+<p class="subhead">先看卡在什么局里，再点进对应篇目</p></header>
 <div class="learn-body">
-<p class="lead">先看「党与作者当时卡在什么局里」，再点进对应篇目。方法可迁移，结论要回历史。</p>
-<div class="table-wrap"><table class="learn-table">
-<thead><tr><th>阶段</th><th>所处局面</th><th>核心问题</th><th>读什么</th></tr></thead>
-<tbody>{''.join(rows)}</tbody>
-</table></div>
+<p class="lead">方法可迁移，结论要回历史。下方时间轴可直接跳原文。</p>
+<div class="timeline tier-b">{''.join(rail)}</div>
+<details class="fold-block">
+  <summary>展开对照表（便于扫描）</summary>
+  <div class="table-wrap"><table class="learn-table">
+  <thead><tr><th>阶段</th><th>所处局面</th><th>核心问题</th><th>读什么</th></tr></thead>
+  <tbody>{''.join(rows)}</tbody>
+  </table></div>
+</details>
 </div></section>"""
     )
 
@@ -600,265 +648,9 @@ def build_learn_pages(articles: list[Article], catalog: dict) -> tuple[str, str]
     return "\n".join(nav), "\n".join(pages)
 
 
-READER_CSS = r"""
-:root{
-  --bg:#0a0a0a; --bg-alt:#141414; --panel:#111; --ink:#f2f2f2; --muted:#a3a3a3;
-  --accent:#e8e8e8; --accent-2:#ffffff; --line:#2a2a2a; --fn:#f5c542;
-  --shadow:0 10px 30px rgba(0,0,0,.45);
-  --font:"Source Han Serif SC","Noto Serif SC","Songti SC","SimSun",serif;
-  --sans:"IBM Plex Sans","Noto Sans SC","PingFang SC",sans-serif;
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.75 var(--font)}
-body{min-height:100vh}
-a{color:#f5c542;text-decoration:none}
-a:hover{text-decoration:underline;color:#ffe08a}
-.app{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
-.side{position:sticky;top:0;height:100vh;overflow:auto;background:linear-gradient(180deg,#0f0f0f,#0a0a0a 55%,#0d0d0d);border-right:1px solid var(--line);padding:18px 14px 40px}
-.brand{padding:8px 10px 16px}
-.brand h1{margin:0;font:700 22px/1.25 var(--sans);letter-spacing:.04em;color:#fff}
-.brand h1 a{color:#fff}
-.brand p{margin:8px 0 0;color:var(--muted);font:13px/1.5 var(--sans)}
-.search{position:relative;margin:0 8px 14px}
-.search input{width:100%;height:40px;border:1px solid var(--line);border-radius:10px;padding:0 12px 0 36px;background:var(--bg-alt);font:14px var(--sans);color:var(--ink)}
-.search input::placeholder{color:#777}
-.search input:focus{outline:0;border-color:#555;background:#181818}
-.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:#888;fill:none;stroke-width:2}
-.vol{margin:0 4px 10px;border:1px solid transparent;border-radius:12px}
-.vol>button{width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:12px;cursor:pointer;font:600 14px/1.35 var(--sans);color:var(--ink)}
-.vol>button:hover,.vol.active>button{background:rgba(255,255,255,.06)}
-.vol .meta{display:block;margin-top:2px;font:12px/1.3 var(--sans);color:var(--muted);font-weight:500}
-.alist{display:none;padding:0 4px 8px}
-.vol.open .alist{display:block}
-.alist a{display:block;padding:7px 10px;border-radius:8px;color:#e5e5e5;font:13px/1.4 var(--sans)}
-.alist a:hover,.alist a.active{background:#1a1a1a;box-shadow:inset 0 0 0 1px #333;text-decoration:none;color:#fff}
-.alist a .d{display:block;color:#888;font-size:11px;margin-top:2px}
-.main{padding:28px 7vw 80px;max-width:980px}
-.hero{margin-bottom:22px;padding:22px 24px;border-radius:18px;background:
-  radial-gradient(1000px 220px at 12% -30%, rgba(245,197,66,.12), transparent 55%),
-  linear-gradient(160deg,#151515,#0f0f0f 60%,#121212);border:1px solid var(--line);box-shadow:var(--shadow)}
-.hero h2{margin:0 0 8px;font:700 30px/1.25 var(--sans);color:#fff}
-.hero p{margin:0;color:var(--muted);font:14px/1.6 var(--sans);max-width:62ch}
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
-.chip{border:1px solid #333;background:#161616;border-radius:999px;padding:6px 12px;font:12px var(--sans);color:#ccc}
-.results{display:none;margin:18px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg-alt)}
-.results h3{margin:0 0 8px;font:600 15px var(--sans);color:#fff}
-.results a{display:block;padding:8px 6px;border-bottom:1px solid var(--line);font:14px/1.45 var(--sans);color:#eee}
-.results a:last-child{border-bottom:0}
-.results a small{display:block;color:var(--muted);margin-top:2px}
-.article{display:none}
-.article.on{display:block;animation:fade .25s ease}
-@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.article header{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.article header .crumb{font:12px var(--sans);color:var(--muted);margin-bottom:8px}
-.article h1{margin:0 0 8px;font:700 28px/1.3 var(--sans);color:#fff}
-.article .date{color:#f5c542;font:600 14px var(--sans)}
-.intro{margin:16px 0 22px;padding:14px 16px;border-left:3px solid #f5c542;background:rgba(255,255,255,.04);color:#d4d4d4;font-size:15px}
-.body p{margin:0 0 1.05em;text-indent:2em;color:#f0f0f0}
-.body h2{margin:1.6em 0 .7em;font:700 22px/1.35 var(--sans);color:#fff}
-.body h3{margin:1.3em 0 .55em;font:700 18px/1.35 var(--sans);color:#f5f5f5}
-a.fn{color:var(--fn);font-weight:700;padding:0 .1em;border-radius:3px}
-a.fn:target, li:target{background:#3a3110;outline:2px solid #f5c542}
-.notes-wrap{margin-top:36px;padding-top:18px;border-top:2px solid var(--line)}
-.notes-wrap h2{margin:0 0 12px;font:700 20px var(--sans);color:#fff}
-.notes{margin:0;padding:0;list-style:none}
-.notes li{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid transparent;font-size:14.5px;line-height:1.7;color:#ddd}
-.notes li:hover{border-color:#333}
-.fn-back{font-weight:700;margin-right:.25em;color:#f5c542}
-.empty{padding:40px 10px;color:var(--muted);font:15px var(--sans)}
-.foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:#888;font:12px/1.6 var(--sans)}
-.foot a{color:#f5c542}
-/* structured learning */
-.side-label{margin:4px 12px 8px;font:700 11px/1 var(--sans);letter-spacing:.12em;color:#777;text-transform:uppercase}
-.learn-nav-a{display:block;padding:7px 12px;margin:0 4px;border-radius:8px;color:#ddd;font:13px/1.35 var(--sans)}
-.learn-nav-a.sub{padding-left:22px;font-size:12.5px;color:#bbb}
-.learn-nav-a:hover,.learn-nav-a.active{background:rgba(245,197,66,.1);color:#ffe08a;text-decoration:none}
-.learn-page{display:none}
-.learn-page.on{display:block;animation:fade .25s ease}
-.learn-page header{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.learn-page h1{margin:0;font:700 28px/1.3 var(--sans);color:#fff}
-.learn-body{font:15px/1.75 var(--sans);color:#e8e8e8}
-.learn-body .lead{color:#bdbdbd;font-size:15px;max-width:62ch;margin:0 0 1.2em}
-.learn-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:18px 0}
-.learn-card{display:flex;flex-direction:column;gap:6px;padding:16px;border:1px solid #2e2e2e;border-radius:14px;background:#121212;color:#eee;text-decoration:none}
-.learn-card:hover{border-color:#f5c542;background:#181818;text-decoration:none;color:#fff}
-.learn-card .n{font:700 12px var(--sans);color:#f5c542}
-.learn-card strong{font:700 16px/1.3 var(--sans)}
-.learn-card span{color:#999;font-size:13px}
-.callout{margin:18px 0;padding:14px 16px;border-left:3px solid #f5c542;background:rgba(245,197,66,.06);color:#d6d6d6;border-radius:0 10px 10px 0}
-.method-list{margin:0;padding:0;list-style:none;counter-reset:m}
-.method-list li{counter-increment:m;margin:0 0 12px;padding:14px 16px 14px 56px;position:relative;border:1px solid #2a2a2a;border-radius:12px;background:#121212}
-.method-list li::before{content:counter(m, decimal-leading-zero);position:absolute;left:14px;top:14px;font:700 14px var(--sans);color:#f5c542}
-.method-list strong{display:block;font-size:16px;margin-bottom:4px}
-.method-list span{color:#aaa;font-size:13.5px}
-.mindmap{margin:18px 0;padding:16px 18px;background:#0f0f0f;border:1px solid #2a2a2a;border-radius:12px;color:#d0d0d0;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:auto;white-space:pre}
-.reading-list{margin:0;padding:0;list-style:none}
-.reading-list li{display:flex;gap:12px;align-items:flex-start;margin:0 0 10px;padding:12px 14px;border:1px solid #2a2a2a;border-radius:12px;background:#121212}
-.reading-list .step{flex:0 0 auto;font:700 13px var(--sans);color:#f5c542;padding-top:2px}
-a.learn-art{display:block;color:#eee;text-decoration:none;flex:1}
-a.learn-art:hover{color:#ffe08a;text-decoration:none}
-a.learn-art .d{display:inline;margin-left:8px;color:#888;font-size:12px}
-a.learn-art .hint{display:block;margin-top:4px;color:#aaa;font-size:13px;font-weight:400}
-.table-wrap{overflow:auto;border:1px solid #2a2a2a;border-radius:12px}
-.learn-table{width:100%;border-collapse:collapse;font:13.5px/1.5 var(--sans);min-width:720px}
-.learn-table th,.learn-table td{padding:12px 14px;border-bottom:1px solid #2a2a2a;vertical-align:top;text-align:left}
-.learn-table th{background:#151515;color:#f5c542;font-weight:700;position:sticky;top:0}
-.learn-table tr:hover td{background:#141414}
-.learn-table .y{color:#888;font-size:12px;margin-top:4px}
-.learn-table .arts a.learn-art{margin:0 0 8px;padding:0;border:0;background:transparent}
-.vol-guide{margin:0 0 16px;padding:16px 18px;border:1px solid #2a2a2a;border-radius:14px;background:#121212}
-.vol-guide h3{margin:0 0 8px;font:700 17px var(--sans);color:#fff}
-.vol-guide h3 small{display:block;margin-top:4px;font:12px var(--sans);color:#888;font-weight:500}
-.vol-guide .arts{display:flex;flex-direction:column;gap:8px;margin:10px 0}
-.open-vol{margin-top:8px;border:1px solid #3a3a3a;background:#1a1a1a;color:#eee;border-radius:8px;padding:8px 12px;font:12px var(--sans);cursor:pointer}
-.open-vol:hover{border-color:#f5c542;color:#ffe08a}
-.discipline{margin:0;padding-left:1.2em;color:#ddd}
-.discipline li{margin:0 0 12px}
-.missing{color:#888}
-@media (max-width:900px){
-  .app{grid-template-columns:1fr}
-  .side{position:relative;height:auto;max-height:none;border-right:0;border-bottom:1px solid var(--line)}
-  .main{padding:20px 18px 60px}
-  .article h1{font-size:24px}
-}
-@media print{
-  :root{--bg:#fff;--ink:#000;--muted:#444;--line:#ccc}
-  body{background:#fff;color:#000}
-  .side,.search,.toolbar,.results{display:none!important}
-  .app{display:block}
-  .main{max-width:none;padding:0}
-  .article{display:block!important;break-before:page;color:#000}
-  .article:first-of-type{break-before:auto}
-  .article h1,.body h2,.body h3,.body p,.intro,.notes li{color:#000}
-  a.fn{color:#000;font-weight:700}
-}
-"""
-
-READER_JS = r"""
-const catalog = window.__CATALOG__;
-const corpus = window.__CORPUS__;
-const qEl = document.getElementById('q');
-const resultsEl = document.getElementById('results');
-const articleEls = new Map([...document.querySelectorAll('.article')].map(el => [el.id, el]));
-const learnEls = new Map([...document.querySelectorAll('.learn-page')].map(el => [el.id, el]));
-
-function hideAllMain(){
-  articleEls.forEach(el => el.classList.remove('on'));
-  learnEls.forEach(el => el.classList.remove('on'));
-  document.getElementById('home').style.display = 'none';
-  resultsEl.style.display = 'none';
-  document.querySelectorAll('.alist a').forEach(a => a.classList.remove('active'));
-  document.querySelectorAll('.learn-nav-a').forEach(a => a.classList.remove('active'));
-}
-
-function openVol(no, forceOpen){
-  document.querySelectorAll('.vol').forEach(v => {
-    const on = v.dataset.no === no;
-    v.classList.toggle('active', on);
-    if (on) v.classList.add('open');
-    else if (!forceOpen) {/* keep others as-is */}
-  });
-}
-
-function showArticle(id, hash){
-  hideAllMain();
-  const el = articleEls.get(id);
-  if (!el) return;
-  el.classList.add('on');
-  document.querySelectorAll('.alist a').forEach(a => a.classList.toggle('active', a.dataset.id === id));
-  const art = corpus[id];
-  if (art) openVol(art.volume_no, true);
-  history.replaceState(null, '', '#' + id + (hash ? '-' + hash : ''));
-  const target = hash ? document.getElementById(id + '-' + hash) : el;
-  (target || el).scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-function showLearn(id){
-  hideAllMain();
-  const el = learnEls.get(id);
-  if (!el){ showHome(); return; }
-  el.classList.add('on');
-  document.querySelectorAll('.learn-nav-a').forEach(a => a.classList.toggle('active', a.dataset.learn === id));
-  history.replaceState(null, '', '#' + id);
-  el.scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-function showHome(){
-  hideAllMain();
-  document.getElementById('home').style.display = 'block';
-  history.replaceState(null, '', location.pathname + location.search);
-}
-
-function search(q){
-  q = (q || '').trim().toLowerCase();
-  if (!q){ resultsEl.style.display='none'; return; }
-  hideAllMain();
-  const hits = [];
-  for (const id of Object.keys(corpus)){
-    const a = corpus[id];
-    const idx = a.search.toLowerCase().indexOf(q);
-    if (idx < 0) continue;
-    const snip = a.search.slice(Math.max(0, idx-24), idx+48).replace(/\s+/g,' ');
-    hits.push({id, title:a.title, volume:a.volume_title, snip, date:a.date});
-    if (hits.length >= 40) break;
-  }
-  resultsEl.style.display = 'block';
-  resultsEl.innerHTML = `<h3>检索结果 · ${hits.length}${hits.length>=40?'+':''}</h3>` +
-    (hits.length ? hits.map(h => `<a href="#${h.id}" data-id="${h.id}"><strong>${escapeHtml(h.title)}</strong><small>${escapeHtml(h.volume)}${h.date?' · '+escapeHtml(h.date):''}<br>…${escapeHtml(h.snip)}…</small></a>`).join('')
-      : '<p class="empty">没有匹配条目。试试更短的关键词。</p>');
-  resultsEl.querySelectorAll('a[data-id]').forEach(a => a.addEventListener('click', e => {
-    e.preventDefault(); showArticle(a.dataset.id);
-  }));
-}
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function route(){
-  const h = decodeURIComponent(location.hash.replace(/^#/, ''));
-  if (!h){ showHome(); return; }
-  if (h.startsWith('learn-')){ showLearn(h); return; }
-  const m = h.match(/^(v\d+-a\d+)(?:-(.+))?$/);
-  if (m){ showArticle(m[1], m[2] || ''); return; }
-  showHome();
-}
-
-document.querySelectorAll('.vol > button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const vol = btn.parentElement;
-    vol.classList.toggle('open');
-    document.querySelectorAll('.vol').forEach(v => v.classList.toggle('active', v === vol));
-  });
-});
-document.querySelectorAll('.alist a, a.learn-art').forEach(a => {
-  a.addEventListener('click', e => {
-    const id = a.dataset.id;
-    if (!id) return;
-    e.preventDefault();
-    showArticle(id);
-  });
-});
-document.querySelectorAll('[data-learn]').forEach(a => {
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    showLearn(a.dataset.learn);
-  });
-});
-document.querySelectorAll('.open-vol').forEach(btn => {
-  btn.addEventListener('click', () => {
-    openVol(btn.dataset.vol, true);
-    const vol = document.querySelector(`.vol[data-no="${btn.dataset.vol}"]`);
-    if (vol) vol.scrollIntoView({behavior:'smooth', block:'nearest'});
-  });
-});
-document.getElementById('homeLink').addEventListener('click', e => { e.preventDefault(); showHome(); qEl.value=''; search(''); });
-qEl.addEventListener('input', () => search(qEl.value));
-window.addEventListener('hashchange', route);
-const params = new URLSearchParams(location.search);
-if (params.get('q')) { qEl.value = params.get('q'); search(qEl.value); }
-route();
-"""
+ASSETS = Path(__file__).resolve().parent
+READER_CSS = (ASSETS / "reader.css").read_text(encoding="utf-8")
+READER_JS = (ASSETS / "reader.js").read_text(encoding="utf-8")
 
 
 def shell_html(catalog: dict, articles: list[Article], *, print_mode: bool = False) -> str:
@@ -895,17 +687,41 @@ def shell_html(catalog: dict, articles: list[Article], *, print_mode: bool = Fal
 
     article_parts = []
     for a in articles:
-        intro_html = f'<div class="intro">{md_inline(a.intro)}</div>' if a.intro else ""
+        intro_block = ""
+        if a.intro:
+            intro_block = (
+                f'<details class="intro-fold" open><summary>题解 / 背景说明</summary>'
+                f'<div class="intro">{md_inline(a.intro)}</div></details>'
+            )
+        toc = ""
+        if a.subsections:
+            toc_links = "".join(
+                f'<a href="#{html.escape(a.id)}-h-{html.escape(slugify(s))}">{html.escape(s)}</a>'
+                for s in a.subsections[:24]
+            )
+            toc = f'<nav class="article-toc"><div class="toc-label">本文目录</div>{toc_links}</nav>'
         notes = ""
         if a.notes_html:
-            notes = f'<section class="notes-wrap"><h2>注释</h2>{a.notes_html}</section>'
+            notes = (
+                f'<details class="notes-fold" open><summary>注释 · {a.note_count} 条</summary>'
+                f'<section class="notes-wrap">{a.notes_html}</section></details>'
+            )
+        bar = (
+            f'<div class="reading-bar">'
+            f'<button type="button" data-back-learn="learn-overview">← 学习路径</button>'
+            f'<button type="button" data-back-learn="learn-l1">坐标系</button>'
+            f'<span class="bar-title">{html.escape(a.title)}</span>'
+            f'{"<button type=button data-scroll-notes>跳到注释</button>" if a.notes_html else ""}'
+            f'</div>'
+        )
         article_parts.append(
             f'<article class="article" id="{html.escape(a.id)}" data-volume="{html.escape(a.volume_no)}">'
+            f"{bar}"
             f'<header><div class="crumb">{html.escape(a.volume_title)}'
             f'{" · 非官方静火整理" if not a.official else ""}</div>'
             f'<h1>{html.escape(a.title)}</h1>'
             f'{f"<div class=date>（{html.escape(a.date)}）</div>" if a.date else ""}'
-            f"</header>{intro_html}<div class='body'>{a.body_html}</div>{notes}</article>"
+            f"</header>{intro_block}{toc}<div class='body'>{a.body_html}</div>{notes}</article>"
         )
 
     mode_class = "print-root" if print_mode else "app"
@@ -956,8 +772,9 @@ def shell_html(catalog: dict, articles: list[Article], *, print_mode: bool = Fal
       正文整理来自 <a href="https://github.com/NpTIme/MaoZeDongAnthology" target="_blank" rel="noopener">NpTIme/MaoZeDongAnthology</a>。
       本页含结构化学习路径（章节 / 检索 / 注释跳转），生成自仓库构建脚本，不改变原文表述。
     </footer>
-  </main>
+    </main>
 </div>
+<button type="button" class="back-top" id="backTop" title="回到顶部">↑ 顶部</button>
 <script>
 window.__CATALOG__ = {json.dumps(catalog, ensure_ascii=False)};
 window.__CORPUS__ = {json.dumps(corpus, ensure_ascii=False)};
